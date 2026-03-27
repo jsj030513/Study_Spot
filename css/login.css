@@ -1,0 +1,157 @@
+/* 중앙 정렬 컨테이너 */
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    background: var(--surface);
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+/* 헤더 & 로고 */
+.login-header {
+    text-align: center;
+    margin-bottom: 40px;
+    cursor: pointer;
+}
+
+.login-header .logo-badge {
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.login-header h1 {
+    font-family: 'Gmarket Sans';
+    font-size: 1.8rem;
+    color: var(--text);
+    margin: 0 0 8px 0;
+}
+
+.login-subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* 입력 폼 공통 */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.95rem;
+    transition: 0.2s;
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43, 90, 158, 0.1);
+}
+
+/* 중복확인 버튼 영역 수정 (이미지 속 이슈 해결) */
+.input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center; /* 세로 중앙 정렬 */
+}
+
+.input-row input {
+    flex: 1; /* 인풋창이 남은 공간 다 차지 */
+}
+
+.duplicate-btn {
+    white-space: nowrap; /* 글자 줄바꿈 방지 */
+    height: 48px; /* 인풋창과 높이 맞춤 */
+    padding: 0 15px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.duplicate-btn:hover {
+    background: #e9ecef;
+}
+
+/* 가입하기/로그인 버튼 */
+.login-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Gmarket Sans';
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.login-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(43, 90, 158, 0.2);
+}
+
+/* 하단 체크박스 및 링크 */
+.form-options {
+    margin: 15px 0 25px 0;
+    text-align: left;
+}
+
+.check-container {
+    font-size: 0.85rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.login-footer a {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 8px;
+}

@@ -1,0 +1,276 @@
+/* --- 기본 레이아웃 설정 --- */
+:root {
+    --accent: #2b5a9e;      /* 메인 블루 */
+    --accent2: #51cf66;     /* 성공/안정 그린 */
+    --warning: #fab005;     /* 주의/보통 옐로우 */
+    --text: #2d3436;
+    --muted: #636e72;
+    --border: #edf2f7;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f1f3f5;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text);
+    overflow: hidden; /* 전체 페이지 스크롤 방지 (내부 스크롤 사용) */
+}
+
+/* --- 네비게이션 --- */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.logo-badge {
+    background: var(--accent);
+    padding: 6px;
+    border-radius: 8px;
+    color: white;
+}
+
+.logo-text {
+    font-family: 'Gmarket Sans';
+    font-weight: 700;
+}
+
+.logo-text span {
+    color: var(--accent);
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+}
+
+.nav-links a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* --- 메인 컨테이너 (그리드 레이아웃) --- */
+.main-container {
+    display: grid;
+    grid-template-columns: 380px 1fr; /* 좌측 리스트 고정, 우측 지도 확장 */
+    height: calc(100vh - 70px);
+    max-width: 1600px;
+    margin: 0 auto;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- 좌측 리스트 섹션 --- */
+.list-section {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.list-header h2 {
+    font-family: 'Gmarket Sans';
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+/* 검색창 */
+.search-mini input {
+    width: 100%;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+/* 카테고리 3x2 그리드 */
+.category-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.category-chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.category-chip.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+/* 스팟 리스트 */
+.spot-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.spot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.spot-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.card-name { font-weight: 700; font-size: 1.05rem; }
+.score-badge {
+    background: #f0f4f8;
+    color: var(--accent);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+/* --- 우측 지도 섹션 --- */
+.map-section {
+    background: var(--surface2);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- 지도 커스텀 마커 (스코어 핀) --- */
+.map-marker-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.score-pin {
+    width: 42px;
+    height: 42px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+
+.score-pin span {
+    transform: rotate(45deg); /* 숫자는 똑바로 */
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+/* 점수별 마커 색상 */
+.score-pin.high { background: var(--accent); }   /* 90+ */
+.score-pin.mid  { background: var(--accent2); }  /* 80~89 */
+.score-pin.low  { background: var(--warning); }  /* 79이하 */
+
+.marker-title {
+    margin-top: 8px;
+    background: white;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+/* --- 상세 패널 (Bottom Sheet) --- */
+.detail-panel {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-radius: 30px 30px 0 0;
+    padding: 30px 40px;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+    z-index: 1000;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+}
+
+.detail-panel.open { transform: translateY(0); }
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.detail-name { font-family: 'Gmarket Sans'; font-size: 1.5rem; font-weight: 700; }
+.detail-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+
+.big-score { font-size: 3.5rem; font-weight: 700; color: var(--accent); }
+
+/* 카드 내 정보 행 스타일 */
+.card-info-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.info-tag {
+    font-size: 0.75rem;
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-weight: 500;
+}
+
+.card-type {
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
+}

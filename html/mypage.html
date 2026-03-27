@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공부명당 - 마이페이지</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/mypage.css">
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <a href="main.html" class="logo">
+                <span class="logo-icon">📍</span>
+                <span>공부</span>명당
+            </a>
+            <nav>
+                <a href="main.html" class="nav-link">탐색하기</a>
+                <a href="#" class="nav-link">장소추가</a>
+                <a href="mypage.html" class="nav-link active">마이페이지</a>
+                <button class="btn-login" onclick="handleLogout()" style="margin-left:15px;">로그아웃</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="mypage-main">
+        <aside class="profile-panel">
+            <div class="user-avatar">👤</div>
+            <h3>장성주님</h3>
+            <p style="color:var(--text-sub); font-size:0.9rem;">백석대학교 컴퓨터공학부</p>
+            <button class="chip" style="margin-top:20px; width:100%;">정보 수정</button>
+        </aside>
+
+        <section class="favorite-panel">
+            <div class="panel-header">
+                <h2>⭐ 내가 찜한 <span>공부명당</span></h2>
+                <p>내가 즐겨찾기한 장소들을 확인하고 관리하세요.</p>
+            </div>
+            <div id="favList" class="fav-grid">
+                </div>
+        </section>
+    </div>
+
+    <script src="js/mypage.js"></script>
+</body>
+</html>

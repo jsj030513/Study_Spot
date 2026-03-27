@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공부명당 — 회원가입</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gmarket+Sans:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/login.css"> </head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="login-container">
+        <div class="login-header" onclick="location.href='./main.html'">
+            <div class="logo-badge">📍</div>
+            <h1 class="logo-text"><span>공부</span>명당</h1>
+            <p class="login-subtitle">새로운 공부 명당을 함께 찾아봐요!</p>
+        </div>
+
+        <form class="login-form" id="joinForm">
+            <div class="input-group">
+                <label for="userName">이름</label>
+                <input type="text" id="userName" placeholder="성함을 입력하세요" required>
+            </div>
+
+            <div class="input-group">
+                <label for="userId">아이디</label>
+                <div class="input-row"> <input type="text" id="userId" placeholder="아이디" required>
+                    <button type="button" class="duplicate-btn">중복확인</button> </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="userPw">비밀번호</label>
+                <input type="password" id="userPw" placeholder="8자 이상 입력하세요" required>
+            </div>
+
+            <div class="input-group">
+                <label for="userPwConfirm">비밀번호 확인</label>
+                <input type="password" id="userPwConfirm" placeholder="비밀번호를 한 번 더 입력하세요" required>
+            </div>
+
+            <div class="form-options">
+                <label class="check-container" style="font-size: 0.8rem;">
+                    <input type="checkbox" required> 이용약관 및 개인정보 처리방침 동의
+                </label>
+            </div>
+
+            <button type="submit" class="login-btn">가입하기</button>
+        </form>
+
+        <div class="login-footer">
+            <span>이미 계정이 있으신가요?</span>
+            <a href="login.html">로그인 하러가기</a>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+</body>
+</html>

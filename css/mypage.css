@@ -1,0 +1,84 @@
+/* 마이페이지 레이아웃 */
+.mypage-main {
+    display: flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    gap: 24px;
+    padding: 0 20px;
+}
+
+/* 왼쪽 프로필 패널 */
+.profile-panel {
+    flex: 0 0 300px;
+    background: var(--white);
+    border-radius: 24px;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    height: fit-content;
+}
+
+.user-avatar {
+    font-size: 3.5rem;
+    background: var(--bg);
+    width: 90px;
+    height: 90px;
+    line-height: 90px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+}
+
+/* 오른쪽 즐겨찾기 패널 */
+.favorite-panel {
+    flex: 1;
+    background: var(--white);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.fav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 30px;
+}
+
+/* 즐겨찾기 카드 (메인 spot-card 디자인 계승) */
+.fav-card {
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid transparent;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fav-card:hover {
+    border-color: var(--primary);
+    background: var(--white);
+    box-shadow: 0 10px 20px rgba(49, 130, 246, 0.1);
+}
+
+.fav-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.fav-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.btn-del {
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}

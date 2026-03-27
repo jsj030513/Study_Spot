@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공부명당 — 로그인</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+    <div class="grid-bg"></div>
+    
+    <div class="login-container">
+        <div class="login-header" onclick="location.href='./main.html'">
+            <div class="logo-badge">📍</div>
+            <h1 class="logo-text"><span>공부</span>명당</h1>
+            <p class="login-subtitle">다시 공부에 집중할 시간입니다.</p>
+        </div>
+
+        <form class="login-form" id="loginForm">
+            <div class="input-group">
+                <label for="userId">아이디</label>
+                <input type="text" id="userId" placeholder="아이디를 입력하세요" required>
+            </div>
+            <div class="input-group">
+                <label for="userPw">비밀번호</label>
+                <input type="password" id="userPw" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <button type="submit" class="login-btn">로그인</button>
+        </form>
+
+        <div class="login-footer">
+            <span>계정이 없으신가요?</span>
+            <a href="join.html">회원가입 하기</a>
+        </div>
+    </div>
+
+    <script src="../js/login.js"></script>
+</body>
+</html>
