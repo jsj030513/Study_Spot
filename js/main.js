@@ -81,7 +81,7 @@ const spotData = [
 let map;
 let overlays = [];
 let selectedSpotForNav = null; // 현재 선택된 장소 정보 저장용
-let isLoggedIn = true;       // 로그인 상태 (테스트 시 true로 변경)
+let isLoggedIn = false;       // 로그인 상태 (테스트 시 true로 변경)
 let userName = "장성주";
 
 // 2. 초기화 함수

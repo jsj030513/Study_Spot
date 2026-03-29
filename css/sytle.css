@@ -63,7 +63,8 @@ header nav {
   margin: 0 15px;
   font-weight: 600;
   transition: 0.2s;
-  display: inline-block; /* 추가 */
+  display: inline-flex;
+  align-items: center;
 }
 
 .nav-link.active {
