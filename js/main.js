@@ -1,10 +1,15 @@
-// wifi: 빵빵함 / 보통 / 없음, socket: 많음 / 보통 / 적음 / 없음
+/**
+ * Study-Spot 메인 로직
+ * 작성자: 장성주 (Baekseok Univ. Software '22)
+ */
+
+// 1. 장소 데이터 (WIFI: 빵빵함/보통/없음, Socket: 많음/보통/적음/없음)
 const spotData = [
-    { id: 1, name: '안라커피', score: 85, type: 'cafe', typeName: '카페', lat: 36.8334791, lng: 127.1731506, wifi: '보통', socket: '적음', free: 30 },
-    { id: 2, name: '카페고메', score: 90, type: 'cafe', typeName: '카페', lat: 36.8341021, lng: 127.1729208, wifi: '좋음', socket: '많음', free: 60 },
-    { id: 3, name: '사람 그리고 이야기', score: 88, type: 'cafe', typeName: '카페', lat: 36.8348171, lng: 127.1728410, wifi: '좋음', socket: '보통', free: 55 },
+    { id: 1, name: '안라커피', score: 85, type: 'cafe', typeName: '카페', lat: 36.833450, lng: 127.173136, wifi: '보통', socket: '적음', free: 30 },
+    { id: 2, name: '카페고메', score: 90, type: 'cafe', typeName: '카페', lat: 36.834127, lng: 127.172958, wifi: '좋음', socket: '많음', free: 60 },
+    { id: 3, name: '사람 그리고 이야기', score: 88, type: 'cafe', typeName: '카페', lat: 36.834812, lng: 127.172922, wifi: '좋음', socket: '보통', free: 55 },
     { id: 4, name: 'Eso', score: 80, type: 'cafe', typeName: '카페', lat: 36.8141891, lng: 127.1787319, wifi: '보통', socket: '적음', free: 40 },
-    { id: 5, name: '예뫼골', score: 78, type: 'cafe', typeName: '카페', lat: 36.8314512, lng: 127.1862976, wifi: '보통', socket: '없음', free: 35 },
+    { id: 5, name: '예뫼골', score: 78, type: 'cafe', typeName: '카페', lat: 36.8314512, lng: 127.186215, wifi: '보통', socket: '없음', free: 35 },
     { id: 6, name: '소소하며 달달한 카페', score: 82, type: 'cafe', typeName: '카페', lat: 36.8316793, lng: 127.1775288, wifi: '보통', socket: '적음', free: 45 },
     { id: 7, name: '루나틱스', score: 75, type: 'cafe', typeName: '카페', lat: 36.8376232, lng: 127.1745275, wifi: '보통', socket: '적음', free: 30 },
     { id: 8, name: '블랙컨테이너', score: 70, type: 'cafe', typeName: '카페', lat: 36.8411054, lng: 127.1807979, wifi: '보통', socket: '미확인', free: 25 },
@@ -39,9 +44,11 @@ const spotData = [
     { id: 37, name: '카페 엠 (리각미술관 내)', score: 87, type: 'cafe', typeName: '갤러리카페', lat: 36.8205, lng: 127.1885, wifi: '좋음', socket: '적음', free: 50 },
     { id: 38, name: '서단', score: 88, type: 'cafe', typeName: '대형카페', lat: 36.8126, lng: 127.1812, wifi: '좋음', socket: '보통', free: 45 },
 
-    { id: 39, name: '백석대학교 도서관', score: 99, type: 'library', typeName: '도서관', lat: 36.8390, lng: 127.1785, wifi: '암호', socket: '많음', free: 80 },
-    { id: 40, name: '상명대학교 도서관', score: 87, type: 'library', typeName: '도서관', lat: 36.8330721, lng: 127.1781372, wifi: '암호', socket: '많음', free: 75 },
-    { id: 41, name: '단국대학교 도서관', score: 80, type: 'library', typeName: '도서관', lat: 36.8359131, lng: 127.1665654, wifi: '암호', socket: '많음', free: 66 },
+    { id: 39, name: '백석대학교 도서관', score: 99, type: 'library', typeName: '도서관', lat: 36.839350, lng: 127.185960, wifi: '암호', socket: '많음', free: 80 },
+    { id: 40, name: '상명대학교 도서관', score: 87, type: 'library', typeName: '도서관', lat: 36.6021911, lng: 126.955345, wifi: '암호', socket: '많음', free: 75 },
+    { id: 41, name: '단국대학교 도서관', score: 80, type: 'library', typeName: '도서관', lat: 36.835777, lng: 127.166544, wifi: '암호', socket: '많음', free: 66 },
+    { id: 73, name: '백석대학교 백석학술정보관', score: 98, type: 'library', typeName: '도서관', lat: 36.837746, lng: 127.184050, wifi: '암호', socket: '많음', free: 90  },
+    { id: 74, name: '백석대학교 백석학술정보관', score: 98, type: 'library', typeName: '도서관', lat: 36.838530, lng: 127.182691, wifi: '암호', socket: '많음', free: 88  },
 
     { id: 42, name: 'CU 안서중앙점', score: 40, type: 'store', typeName: '편의점', lat: 36.8345, lng: 127.1740 },
     { id: 43, name: 'GS25 안서사거리점', type: 'store', typeName: '편의점', lat: 36.8352, lng: 127.1735 },
@@ -80,83 +87,88 @@ const spotData = [
 
 let map;
 let overlays = [];
-let selectedSpotForNav = null; // 현재 선택된 장소 정보 저장용
-let isLoggedIn = false;       // 로그인 상태 (테스트 시 true로 변경)
-let userName = "장성주";
+let selectedSpotForNav = null;
+let isLoggedIn = false;
+let userName = "";
 
-// 2. 초기화 함수
 function init() {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData) {
+        isLoggedIn = true;
+        userName = userData.name;
+    }
+
     initMap();
-    renderSpots('all');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('id');
+
+    if (targetId) {
+        renderSpots('all', '', parseInt(targetId));
+        setTimeout(() => selectSpotById(parseInt(targetId)), 300);
+    } else {
+        renderSpots('all');
+    }
+
     setupEvents();
     updateHeader();
-
 }
 
-// 3. 카카오 지도 생성 (중심점: 안서동 카페거리/백석대 중간)
 function initMap() {
     const container = document.getElementById('kakaoMap');
-    const options = {
-        center: new kakao.maps.LatLng(36.8360, 127.1750), 
-        level: 4 
-    };
+    const options = { center: new kakao.maps.LatLng(36.8360, 127.1750), level: 4 };
     map = new kakao.maps.Map(container, options);
 }
 
-// 4. 리스트 및 마커 렌더링
-function renderSpots(filterType, keyword = '') {
+// 필터링 및 검색 로직 통합
+function renderSpots(filterType, keyword = '', targetId = null) {
     const spotList = document.getElementById('spotList');
+    if (!spotList) return;
     spotList.innerHTML = '';
 
     if (overlays) overlays.forEach(o => o.setMap(null));
     overlays = [];
 
-    spotData.forEach(spot => {
+    const filtered = spotData.filter(spot => {
         const isTypeMatch = filterType === 'all' || spot.type === filterType;
-        const isNameMatch = spot.name.includes(keyword);
+        const isNameMatch = spot.name.toLowerCase().includes(keyword.toLowerCase());
+        const isTargetMatch = targetId ? spot.id === targetId : true;
+        return isTypeMatch && isNameMatch && isTargetMatch;
+    });
 
-        if (isTypeMatch && isNameMatch) {
-            // [A] 리스트 카드 생성
-            const card = document.createElement('div');
-            card.className = 'spot-card';
-            card.innerHTML = `
-                <div class="card-top">
-                    <span class="card-name">${spot.name}</span>
-                    <span class="score-badge">${spot.score || 0}점</span>
-                </div>
-                <div class="card-info-row" style="display:flex; gap:8px; margin-bottom:8px;">
-                    <span class="info-tag" style="font-size:0.75rem; background:#f1f3f5; padding:2px 8px; border-radius:6px; color:#636e72;">📶 와이파이: ${spot.wifi || '미확인'}</span>
-                    <span class="info-tag" style="font-size:0.75rem; background:#f1f3f5; padding:2px 8px; border-radius:6px; color:#636e72;">🔌 콘센트: ${spot.socket || '미확인'}</span>
-                </div>
-                <div class="card-type" style="font-size:0.8rem; color:#2b5a9e; font-weight:700;">${spot.typeName}</div>
-            `;
-            card.onclick = () => selectSpot(spot);
-            spotList.appendChild(card);
+    if (targetId && filtered.length > 0) {
+        const notice = document.createElement('div');
+        notice.style = "padding:10px; background:#eef2ff; font-size:0.8rem; text-align:center; cursor:pointer; color:#3182f6;";
+        notice.innerHTML = "<b>[공부명당]</b> 전체 목록 보기 ↺";
+        notice.onclick = () => location.href = 'main.html';
+        spotList.appendChild(notice);
+    }
 
-            // [B] 점수별 마커 생성
-            const score = spot.score || 0;
-            let scoreClass = 'high';
-            if (score < 80) scoreClass = 'low';
-            else if (score < 90) scoreClass = 'mid';
+    filtered.forEach(spot => {
+        const card = document.createElement('div');
+        card.className = 'spot-card';
+        card.innerHTML = `
+            <div class="card-top"><span class="card-name">${spot.name}</span><span class="score-badge">${spot.score}점</span></div>
+            <div style="font-size:0.75rem; color:#636e72;">📶 ${spot.wifi || '보통'} | 🔌 ${spot.socket || '보통'}</div>
+        `;
+        card.onclick = () => selectSpot(spot);
+        spotList.appendChild(card);
 
-            const content = `
-                <div class="map-marker-wrapper" onclick="selectSpotById(${spot.id})">
-                    <div class="score-pin ${scoreClass}"><span>${score}</span></div>
-                    <div class="marker-title">${spot.name}</div>
-                </div>`;
-
-            const overlay = new kakao.maps.CustomOverlay({
-                position: new kakao.maps.LatLng(spot.lat, spot.lng),
-                content: content,
-                yAnchor: 1.2
-            });
-            overlay.setMap(map);
-            overlays.push(overlay);
-        }
+        const score = spot.score || 0;
+        let scoreClass = (score >= 90) ? 'high' : (score >= 80 ? 'mid' : 'low');
+        const overlay = new kakao.maps.CustomOverlay({
+            position: new kakao.maps.LatLng(spot.lat, spot.lng),
+            content: `<div class="map-marker-wrapper" onclick="selectSpotById(${spot.id})">
+                        <div class="score-pin ${scoreClass}"><span>${score}</span></div>
+                        <div class="marker-title">${spot.name}</div>
+                      </div>`,
+            yAnchor: 1.2
+        });
+        overlay.setMap(map);
+        overlays.push(overlay);
     });
 }
 
-// 5. 장소 선택 및 상세창 제어
 function selectSpot(spot) {
     map.panTo(new kakao.maps.LatLng(spot.lat, spot.lng));
     openDetail(spot);
@@ -168,112 +180,71 @@ window.selectSpotById = function (id) {
 };
 
 function openDetail(spot) {
-    selectedSpotForNav = spot; // 길찾기/즐겨찾기용 데이터 저장
+    selectedSpotForNav = spot;
     document.getElementById('detailName').innerText = spot.name;
-    document.getElementById('detailScore').innerText = spot.score || 0;
-
-    // 상세 지표 게이지바 업데이트
-    const scoreBars = document.getElementById('scoreBars');
-    const wifiPower = (spot.wifi === '좋음' || spot.wifi === '우수' || spot.wifi === '빵빵함') ? 100 : 50;
-    
-    scoreBars.innerHTML = `
-        <div class="bar-row" style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-            <span style="font-size:0.8rem; color:#636e72; width:60px;">와이파이</span>
-            <div style="flex:1; height:8px; background:#edf2f7; border-radius:4px; overflow:hidden;">
-                <div style="width:${wifiPower}%; height:100%; background:#2b5a9e; transition:0.5s;"></div>
-            </div>
-        </div>
-        <div class="bar-row" style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:0.8rem; color:#636e72; width:60px;">쾌적도</span>
-            <div style="flex:1; height:8px; background:#edf2f7; border-radius:4px; overflow:hidden;">
-                <div style="width:${spot.free || 50}%; height:100%; background:#51cf66; transition:0.5s;"></div>
-            </div>
-        </div>
-    `;
+    document.getElementById('detailScore').innerText = spot.score;
     document.getElementById('detailPanel').classList.add('open');
 }
 
-function closeDetail() {
-    document.getElementById('detailPanel').classList.remove('open');
-}
+window.closeDetail = () => document.getElementById('detailPanel').classList.remove('open');
 
-// 6. 외부 연동 기능 (길찾기 & 즐겨찾기)
-function startNavigation() {
+window.startNavigation = () => {
     if (!selectedSpotForNav) return;
     const navUrl = `https://map.kakao.com/link/to/${selectedSpotForNav.name},${selectedSpotForNav.lat},${selectedSpotForNav.lng}`;
     window.open(navUrl, '_blank');
-}
+};
 
-function toggleFavorite() {
-    if (!isLoggedIn) {
-        const goToLogin = confirm("로그인 후 이용 가능한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?");
-        if (goToLogin) location.href = 'login.html';
-        return;
-    }
-
+window.toggleFavorite = () => {
+    if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
     let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
-    const isAlreadyFav = favorites.some(f => f.id === selectedSpotForNav.id);
-
-    if (isAlreadyFav) {
-        favorites = favorites.filter(f => f.id !== selectedSpotForNav.id);
-        alert(`⭐ ${selectedSpotForNav.name} 즐겨찾기가 해제되었습니다.`);
-    } else {
+    if (!favorites.some(f => f.id === selectedSpotForNav.id)) {
         favorites.push({ id: selectedSpotForNav.id, name: selectedSpotForNav.name });
-        alert(`⭐ ${selectedSpotForNav.name} 즐겨찾기에 추가되었습니다!`);
+        localStorage.setItem('myFavorites', JSON.stringify(favorites));
+        alert("즐겨찾기에 추가되었습니다.");
     }
-    localStorage.setItem('myFavorites', JSON.stringify(favorites));
-}
+};
 
-// 7. 이벤트 설정
+// [수정됨] 이벤트 설정 함수 - 검색창 실시간 연동 포함
 function setupEvents() {
     const chips = document.querySelectorAll('.category-chip');
+    const searchInput = document.getElementById('searchInput'); // HTML에서 id="searchInput" 확인 필수
+
+    // 카테고리 칩 클릭
     chips.forEach(chip => {
-        chip.onclick = function () {
+        chip.onclick = function() {
             chips.forEach(c => c.classList.remove('active'));
             this.classList.add('active');
-            renderSpots(this.dataset.type, document.getElementById('searchInput').value);
+            const keyword = searchInput ? searchInput.value : '';
+            renderSpots(this.dataset.type, keyword);
         };
     });
 
-    document.getElementById('searchInput').oninput = function () {
-        const activeType = document.querySelector('.category-chip.active').dataset.type;
-        renderSpots(activeType, this.value);
-    };
+    // 검색창 실시간 입력 (onkeyup) 연동
+    if (searchInput) {
+        searchInput.onkeyup = function() {
+            const activeChip = document.querySelector('.category-chip.active');
+            const type = activeChip ? activeChip.dataset.type : 'all';
+            renderSpots(type, this.value);
+        };
+    }
 }
 
 function updateHeader() {
     const navLinks = document.querySelector('.nav-links');
-    
-    if (isLoggedIn) {
-        // 로그인 상태일 때: 마이페이지, 로그아웃 표시
+    if (isLoggedIn && navLinks) {
         navLinks.innerHTML = `
             <li><a href="main.html" style="color:var(--accent);">탐색하기</a></li>
-            <li><a href="#">장소추가</a></li>
             <li><a href="mypage.html">마이페이지</a></li>
-            <li><a href="#" onclick="handleLogout()">로그아웃</a></li>
-            <li class="user-welcome" style="margin-left:10px; font-size:0.85rem; color:#636e72;">
-                <b>${userName}</b>님 환영합니다!
-            </li>
-        `;
-    } else {
-        // 비로그인 상태일 때 (기존 유지)
-        navLinks.innerHTML = `
-            <li><a href="main.html" style="color:var(--accent);">탐색하기</a></li>
-            <li><a href="#">장소추가</a></li>
-            <li><a href="login.html">로그인</a></li>
-            <li><a href="join.html">회원가입</a></li>
+            <li><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
+            <li style="margin-left:15px; font-size:0.9rem;"><b>${userName}</b>님</li>
         `;
     }
 }
 
-// 4. 로그아웃 처리 함수
-function handleLogout() {
-    if (confirm("로그아웃 하시겠습니까?")) {
-        isLoggedIn = false;
-        alert("로그아웃 되었습니다.");
-        updateHeader(); // 헤더 다시 그리기
-        location.reload(); // 페이지 새로고침 (선택 사항)
-    }
-}
+window.handleLogout = (e) => {
+    e.preventDefault();
+    localStorage.removeItem('user');
+    location.reload();
+};
 
 window.onload = init;

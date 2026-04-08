@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공부명당 | 통합 관리 센터</title>
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+    <nav class="admin-nav">
+        <div class="nav-left">
+            <div class="logo">📍 공부명당 Admin</div>
+            <div class="nav-menu">
+                <button class="menu-btn active" id="btnSpotMode" onclick="switchMode('spot')">장소 관리</button>
+                <button class="menu-btn" id="btnUserMode" onclick="switchMode('user')">회원 관리</button>
+            </div>
+        </div>
+        <div class="user-info">
+            <span id="adminName">불러오는 중...</span>님 (Master)
+            <button class="btn-logout" onclick="handleLogout()">로그아웃</button>
+        </div>
+    </nav>
+
+    <main class="admin-container">
+        <div id="spotSection">
+            <section class="category-dashboard">
+                <div class="category-card active" onclick="filterCategory('전체')">
+                    <div class="card-icon">🏠</div>
+                    <div class="card-info"><h4>전체</h4><p><span id="countAll">0</span>개</p></div>
+                </div>
+                <div class="category-card" onclick="filterCategory('카페')">
+                    <div class="card-icon">☕</div>
+                    <div class="card-info"><h4>카페</h4><p><span id="countCafe">0</span>개</p></div>
+                </div>
+                <div class="category-card" onclick="filterCategory('도서관')">
+                    <div class="card-icon">📚</div>
+                    <div class="card-info"><h4>도서관</h4><p><span id="countLibrary">0</span>개</p></div>
+                </div>
+                <div class="category-card" onclick="filterCategory('편의점')">
+                    <div class="card-icon">🏪</div>
+                    <div class="card-info"><h4>편의점</h4><p><span id="countStore">0</span>개</p></div>
+                </div>
+                <div class="category-card" onclick="filterCategory('문구점')">
+                    <div class="card-icon">✏️</div>
+                    <div class="card-info"><h4>문구점</h4><p><span id="countStationery">0</span>개</p></div>
+                </div>
+                <div class="category-card" onclick="filterCategory('프린트')">
+                    <div class="card-icon">🖨️</div>
+                    <div class="card-info"><h4>프린트</h4><p><span id="countPrint">0</span>개</p></div>
+                </div>
+            </section>
+
+            <section class="management-section">
+                <div class="section-header">
+                    <h2><span id="currentCategoryTitle">전체</span> 목록 관리</h2>
+                    <button class="btn-primary" onclick="toggleModal(true)">+ 새 장소 추가</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>장소명</th><th>카테고리</th><th>평점</th><th>작업</th></tr>
+                    </thead>
+                    <tbody id="spotTableBody"></tbody>
+                </table>
+            </section>
+        </div>
+
+        <div id="userSection" style="display: none;">
+            <section class="management-section">
+                <div class="section-header">
+                    <h2>전체 회원 관리</h2>
+                    <div class="search-box">
+                        <input type="text" id="userSearch" placeholder="회원 이름/이메일 검색" onkeyup="searchUser()">
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>사용자 ID</th>
+                            <th>이름</th>
+                            <th>이메일</th>
+                            <th>가입일</th>
+                            <th>권한</th>
+                            <th>상태 제어</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+
+    <script src="../js/admin.js"></script>
+</body>
+</html>

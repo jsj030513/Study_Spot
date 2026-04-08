@@ -1,235 +1,104 @@
-:root {
-    --primary: #3182f6;
-    --primary-light: #e8f3ff;
-    --text-main: #191f28;
-    --text-sub: #4e5968;
-    --bg: #f2f4f6;
-    --white: #ffffff;
-}
-
+/* 기본 초기화 */
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
-    font-family: 'Pretendard', sans-serif;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
 
 body {
-    margin: 0;
-    background-color: var(--bg);
-    color: var(--text-main);
-}
-
-header {
-  background: var(--white);
-  padding: 0.8rem 2rem;
-  border-bottom: 1px solid #e5e8eb;
-  position: sticky; /* sticky: top; -> position: sticky; 로 수정 */
-  top: 0;
-  z-index: 1000;
-}
-
-header nav {
-  display: flex;
-  align-items: center;
-}
-
-.header-inner {
+    background-color: #0f172a;
+    /* 깊이감 있는 다크 네이비 */
+    color: #f8fafc;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.logo span {
-    color: var(--primary);
-}
-
-.logo-icon {
-    margin-right: 8px;
-    font-size: 1.6rem;
-}
-.nav-link {
-  text-decoration: none;
-  color: var(--text-sub);
-  margin: 0 15px;
-  font-weight: 600;
-  transition: 0.2s;
-  display: inline-flex;
-  align-items: center;
-}
-
-.nav-link.active {
-    color: var(--primary);
-}
-
-.btn-login {
-    background: var(--primary-light);
-    color: var(--primary);
-    border: none;
-    padding: 8px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-main {
-    display: flex;
-    max-width: 1200px;
-    margin: 30px auto;
-    gap: 24px;
-    height: 80vh;
-    padding: 0 20px;
-}
-
-.panel {
-    background: var(--white);
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-    flex: 1;
-    overflow-y: auto;
-    transition: 0.4s;
-}
-
-.panel-header h2 span {
-    color: var(--primary);
-}
-
-.panel-header p {
-    color: var(--text-sub);
-    margin-top: 8px;
-}
-
-/* SVG 인터랙션 */
-.svg-container {
-    text-align: center;
-    margin: 20px 0;
-}
-
-#body-svg {
-    height: 450px;
-}
-
-.silhouette {
-    fill: #f9fafb;
-    stroke: #e5e8eb;
-    stroke-width: 2;
-}
-
-.region {
-    fill: #f2f4f6;
-    transition: 0.3s ease;
-    cursor: pointer;
-}
-
-.region-group:hover .region {
-    fill: var(--primary);
-    opacity: 0.15;
-}
-
-.region-group:hover .svg-label,
-.region-group:hover .svg-label-sm {
-    fill: var(--primary);
-    font-weight: bold;
-}
-
-.svg-label {
-    font-size: 20px;
-    fill: #adb5bd;
-    text-anchor: middle;
-    pointer-events: none;
-}
-
-.svg-label-sm {
-    font-size: 12px;
-    fill: #adb5bd;
-    text-anchor: middle;
-    pointer-events: none;
-}
-
-/* 칩 버튼 */
-.chip-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
     justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.chip {
-    background: var(--bg);
-    border: none;
-    padding: 10px 18px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--text-sub);
-    transition: 0.2s;
-}
-
-.chip:hover {
-    background: var(--primary-light);
-    color: var(--primary);
-}
-
-/* 결과 카드 */
-.state-view {
+/* 히로 섹션 디자인 */
+.hero {
     text-align: center;
-    padding: 40px 0;
+    padding: 2rem;
+    animation: fadeIn 1.2s ease-out;
 }
 
-.empty-anim {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    animation: float 3s infinite ease-in-out;
+/* 제목 스타일: '공부공간' 포인트 */
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
 }
 
-@keyframes float {
+.hero h1 span {
+    color: #10b981;
+    /* 집중력을 높여주는 에메랄드 그린 */
+    position: relative;
+}
 
-    0%,
-    100% {
+/* 강조 라인 효과 */
+.hero h1 span::after {
+    content: "";
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: rgba(16, 185, 129, 0.2);
+    z-index: -1;
+}
+
+/* 부제목 스타일 */
+.hero p {
+    font-size: 1.25rem;
+    color: #94a3b8;
+    margin-bottom: 3rem;
+    font-weight: 300;
+}
+
+/* 버튼 디자인: '공부명당'의 신뢰감 있는 스타일 */
+.btn-start {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background-color: #10b981;
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+}
+
+.btn-start:hover {
+    background-color: #059669;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
+}
+
+/* 간단한 페이드인 애니메이션 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
         transform: translateY(0);
     }
-
-    50% {
-        transform: translateY(-15px);
-    }
 }
 
-.spot-card {
-    background: #f9fafb;
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
-    text-align: left;
-    border: 1px solid transparent;
-    transition: 0.3s;
-}
-
-.spot-card:hover {
-    border-color: var(--primary);
-    background: var(--white);
-    box-shadow: 0 10px 20px rgba(49, 130, 246, 0.1);
-}
-
-.spot-card h4 {
-    margin: 0 0 10px 0;
-    font-size: 1.1rem;
-}
-
-.badge-mini {
-    background: var(--primary);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    margin-right: 6px;
+/* 배경에 은은한 그라데이션 효과 추가 */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+    z-index: -1;
 }

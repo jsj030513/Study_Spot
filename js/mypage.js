@@ -1,110 +1,113 @@
-document.addEventListener('DOMContentLoaded', () => {
-    loadMyFavorites();
-});
-
-/* ================= 1. 즐겨찾기 관리 로직 ================= */
-
-function loadMyFavorites() {
-    const favList = document.getElementById('favList');
+function initMyPage() {
+    const userData = JSON.parse(localStorage.getItem('user'));
     
-    // 메인 페이지와 동일한 키값으로 가져오기
-    const savedData = localStorage.getItem('favorites'); 
-    const favorites = savedData ? JSON.parse(savedData) : [];
-
-    if (favorites.length === 0) {
-        favList.innerHTML = `
-            <div class="state-view" style="grid-column: 1/-1;">
-                <div class="empty-anim">Empty</div>
-                <p>아직 찜한 장소가 없습니다.<br>메인에서 마음에 드는 공부명당을 찾아보세요!</p>
-            </div>`;
+    if (!userData) {
+        alert("로그인이 필요한 페이지입니다.");
+        location.href = 'login.html';
         return;
     }
 
-    favList.innerHTML = favorites.map(item => `
-        <div class="fav-card">
-            <div class="fav-top">
-                <span class="fav-name">${item.name || '장소명 없음'}</span>
-                <button class="btn-del" onclick="deleteFav('${item.name}')">삭제</button>
-            </div>
-            <div class="fav-bottom">
-                <span class="badge-mini">
-                    ${item.score ? item.score + '점' : '점수 정보 없음'}
-                </span>
-                <a href="main.html" class="view-link" style="margin-left: 10px;">
-                    지도에서 보기 >
-                </a>
-            </div>
-        </div>
-    `).join('');
+    const nameEl = document.getElementById('userName');
+    const deptEl = document.getElementById('userDept');
+
+    if (nameEl) nameEl.innerText = `${userData.name}님`;
+    // 학과 정보가 있다면 표시 (데이터 구조에 따라 조절)
+    if (deptEl && userData.dept) deptEl.innerText = userData.dept;
+
+    renderFavorites();
 }
 
-function deleteFav(name) {
-    if(!confirm("즐겨찾기에서 삭제하시겠습니까?")) return;
+// 즐겨찾기 목록 렌더링
+function renderFavorites() {
+    const favListContainer = document.getElementById('favoriteList');
+    if (!favListContainer) return;
 
-    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    favorites = favorites.filter(f => f.name !== name);
-    
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    loadMyFavorites(); 
+    const favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
+
+    if (favorites.length === 0) {
+        favListContainer.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:80px 0; color:#94a3b8;">
+                <span style="font-size:4rem; display:block; margin-bottom:20px;">📭</span>
+                <h3>찜한 목록이 비어있습니다.</h3>
+            </div>
+        `;
+        return;
+    }
+
+    favListContainer.innerHTML = '';
+    favorites.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'fav-card';
+        card.innerHTML = `
+            <div class="fav-card-top">
+                <span class="fav-name" title="${item.name}">${item.name}</span>
+                <button class="btn-del" onclick="removeFavorite(${item.id})">삭제</button>
+            </div>
+            <button class="btn-view-map" onclick="goToMap(${item.id})">지도에서 확인</button>
+        `;
+        favListContainer.appendChild(card);
+    });
 }
-
-/* ================= 2. 정보 수정(비밀번호 변경) 로직 ================= */
 
 // 모달 열기
 function openModal() {
     const modal = document.getElementById('editModal');
-    if(modal) modal.style.display = 'flex';
+    const userData = JSON.parse(localStorage.getItem('user'));
+    
+    if (modal && userData) {
+        document.getElementById('editName').value = userData.name;
+        modal.style.display = 'flex';
+    }
 }
 
 // 모달 닫기
 function closeModal() {
     const modal = document.getElementById('editModal');
-    if(modal) modal.style.display = 'none';
-    
-    // 입력창 초기화
-    document.getElementById('currentPw').value = "";
-    document.getElementById('newPw').value = "";
-    document.getElementById('confirmPw').value = "";
+    if (modal) modal.style.display = 'none';
 }
 
-// 비밀번호 변경 실행
-function updatePassword() {
-    const currentPw = document.getElementById('currentPw').value;
-    const newPw = document.getElementById('newPw').value;
-    const confirmPw = document.getElementById('confirmPw').value;
-
-    // 로컬스토리지에서 유저 정보 가져오기 (가입 시 저장한 키값 확인 필요)
-    const userData = JSON.parse(localStorage.getItem('user'));
-
-    if (!currentPw || !newPw || !confirmPw) {
-        alert("모든 필드를 입력해주세요.");
+// 정보 저장
+function saveUserInfo() {
+    const newName = document.getElementById('editName').value;
+    
+    if (!newName.trim()) {
+        alert("이름을 입력해주세요.");
         return;
     }
 
-    // 현재 비밀번호 체크
-    if (userData && userData.password !== currentPw) {
-        alert("현재 비밀번호가 일치하지 않습니다.");
-        return;
-    }
-
-    // 새 비밀번호 일치 체크
-    if (newPw !== confirmPw) {
-        alert("새 비밀번호 확인이 일치하지 않습니다.");
-        return;
-    }
-
-    // 데이터 업데이트
-    userData.password = newPw;
+    let userData = JSON.parse(localStorage.getItem('user'));
+    userData.name = newName;
     localStorage.setItem('user', JSON.stringify(userData));
-    
-    alert("비밀번호가 안전하게 변경되었습니다.");
+
+    alert("성공적으로 수정되었습니다!");
     closeModal();
+    initMyPage(); // 화면 정보 갱신
 }
 
-/* ================= 3. 기타 유틸리티 ================= */
+function goToMap(id) {
+    location.href = `main.html?id=${id}`;
+}
+
+function removeFavorite(id) {
+    if (confirm("즐겨찾기에서 삭제하시겠습니까?")) {
+        let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
+        favorites = favorites.filter(f => f.id !== id);
+        localStorage.setItem('myFavorites', JSON.stringify(favorites));
+        renderFavorites();
+    }
+}
 
 function handleLogout() {
     if (confirm("로그아웃 하시겠습니까?")) {
+        localStorage.removeItem('user');
         location.href = 'main.html';
     }
 }
+
+// 바깥 영역 클릭 시 모달 닫기
+window.onclick = function(event) {
+    const modal = document.getElementById('editModal');
+    if (event.target == modal) closeModal();
+}
+
+window.addEventListener('DOMContentLoaded', initMyPage);

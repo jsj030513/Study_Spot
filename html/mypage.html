@@ -20,16 +20,15 @@
         <ul class="nav-links">
             <li><a href="main.html">탐색하기</a></li>
             <li><a href="mypage.html" style="color:var(--accent);">마이페이지</a></li>
-            <li><a href="./main.html" onclick="handleLogout()">로그아웃</a></li>
+            <li><a href="#" onclick="handleLogout()">로그아웃</a></li>
         </ul>
     </nav>
 
     <main class="mypage-main">
         <aside class="profile-panel">
             <div class="user-avatar">👤</div>
-            <h3>장성주님</h3>
-            <p style="color:var(--text-sub); font-size:0.9rem;">백석대학교 컴퓨터공학부</p>
-            <button class="chip" style="margin-top:20px; width:100%;" onclick="openModal()">정보 수정</button>
+            <h3 id="userName">가져오는 중...</h3>
+            <p id="userDept">소프트웨어학과</p> <button onclick="openModal()" class="btn-edit-profile">정보 수정</button>
         </aside>
 
         <section class="favorite-panel">
@@ -37,38 +36,27 @@
                 <h2>⭐ 내가 찜한 <span>공부명당</span></h2>
                 <p>내가 즐겨찾기한 장소들을 확인하고 관리하세요.</p>
             </div>
-            <div id="favList" class="fav-grid">
-                </div>
+            
+            <div class="fav-grid-wrapper">
+                <div id="favoriteList" class="fav-grid">
+                    </div>
+            </div>
         </section>
     </main>
 
-    <div id="editModal" class="modal-overlay">
+    <div id="editModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>🔐 비밀번호 변경</h2>
-                <button class="close-btn" onclick="closeModal()">✕</button>
+            <h2>내 정보 수정</h2>
+            <div class="input-group">
+                <label for="editName">이름 수정</label>
+                <input type="text" id="editName" placeholder="이름을 입력하세요">
             </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <label>현재 비밀번호</label>
-                    <input type="password" id="currentPw" placeholder="현재 비밀번호를 입력하세요">
-                </div>
-                <div class="input-group">
-                    <label>새 비밀번호</label>
-                    <input type="password" id="newPw" placeholder="새로운 비밀번호를 입력하세요">
-                </div>
-                <div class="input-group">
-                    <label>새 비밀번호 확인</label>
-                    <input type="password" id="confirmPw" placeholder="새 비밀번호를 한번 더 입력하세요">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn secondary" onclick="closeModal()">취소</button>
-                <button class="action-btn primary" onclick="updatePassword()">변경하기</button>
+            <div class="modal-buttons">
+                <button onclick="closeModal()" class="btn-cancel">취소</button>
+                <button onclick="saveUserInfo()" class="btn-save">저장하기</button>
             </div>
         </div>
     </div>
-
 
     <script src="../js/mypage.js"></script>
 </body>
