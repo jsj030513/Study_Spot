@@ -91,13 +91,16 @@ let userList = [
     { id: "admin_test", name: "박관리", email: "admin@bu.ac.kr", date: "2026-01-10", role: "관리자" }
 ];
 
+// 초기화 이벤트
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("adminName").innerText = sessionInfo.adminName;
+    const adminNameEl = document.getElementById("adminName");
+    if(adminNameEl) adminNameEl.innerText = sessionInfo.adminName;
     updateDashboard();
-    renderSpotTable(); // 초기 테이블 렌더링
+    renderSpotTable(); 
     renderUserTable();
 });
 
+// 모드 전환 (장소 관리 vs 회원 관리)
 function switchMode(mode) {
     const spotSec = document.getElementById('spotSection');
     const userSec = document.getElementById('userSection');
@@ -109,7 +112,7 @@ function switchMode(mode) {
         userSec.style.display = 'none';
         btnSpot.classList.add('active');
         btnUser.classList.remove('active');
-        updateDashboard(); // 장소 관리 모드로 돌아올 때 대시보드 갱신
+        updateDashboard(); 
     } else {
         spotSec.style.display = 'none';
         userSec.style.display = 'block';
@@ -118,13 +121,11 @@ function switchMode(mode) {
     }
 }
 
+// 대시보드 카운트 업데이트
 function updateDashboard() {
-    // 초기화
     const counts = { "전체": spotList.length, "카페": 0, "도서관": 0, "편의점": 0, "문구점": 0, "프린트": 0 };
     
-    // 데이터 카운트 (데이터의 category 값과 정확히 일치해야 함)
     spotList.forEach(item => {
-        // 데이터에 '복사/인쇄'라고 되어있으면 '프린트'로 간주
         let cat = item.category;
         if(cat === "복사/인쇄") cat = "프린트";
         if(cat === "문구/잡화" || cat === "교내문구") cat = "문구점";
@@ -134,7 +135,6 @@ function updateDashboard() {
         }
     });
 
-    // HTML 요소 존재 확인 후 대입
     if(document.getElementById("countAll")) document.getElementById("countAll").innerText = counts["전체"];
     if(document.getElementById("countCafe")) document.getElementById("countCafe").innerText = counts["카페"];
     if(document.getElementById("countLibrary")) document.getElementById("countLibrary").innerText = counts["도서관"];
@@ -143,6 +143,7 @@ function updateDashboard() {
     if(document.getElementById("countPrint")) document.getElementById("countPrint").innerText = counts["프린트"];
 }
 
+// 카테고리 필터링
 function filterCategory(category) {
     currentFilter = category;
     const titleEl = document.getElementById("currentCategoryTitle");
@@ -158,6 +159,7 @@ function filterCategory(category) {
     renderSpotTable();
 }
 
+// 장소 테이블 렌더링
 function renderSpotTable() {
     const tableBody = document.getElementById("spotTableBody");
     if(!tableBody) return;
@@ -165,7 +167,6 @@ function renderSpotTable() {
     const filteredData = currentFilter === "전체" 
         ? spotList 
         : spotList.filter(item => {
-            // 필터링 시에도 카테고리 매핑 적용
             let cat = item.category;
             if(cat === "복사/인쇄") cat = "프린트";
             if(cat === "문구/잡화" || cat === "교내문구") cat = "문구점";
@@ -184,7 +185,7 @@ function renderSpotTable() {
     `).join("");
 }
 
-// 회원 관리 및 기타 함수들은 기존과 동일하게 유지...
+// 회원 테이블 렌더링
 function renderUserTable() {
     const tbody = document.getElementById("userTableBody");
     if(!tbody) return;
@@ -195,7 +196,34 @@ function renderUserTable() {
             <td>${user.email}</td>
             <td>${user.date}</td>
             <td>${user.role}</td>
-            <td><button onclick="deleteUser('${user.id}')">삭제</button></td>
+            <td>
+                <button onclick="deleteUser('${user.id}')" style="color:#ff4d4d; border:none; background:none; cursor:pointer; font-weight:600;">삭제</button>
+            </td>
         </tr>
     `).join("");
+}
+
+// 장소 삭제 함수
+function deleteSpot(id) {
+    const target = spotList.find(item => item.id === id);
+    if (!target) return;
+
+    if (confirm(`[${target.name}] 장소를 목록에서 영구히 삭제하시겠습니까?`)) {
+        spotList = spotList.filter(item => item.id !== id);
+        updateDashboard();
+        renderSpotTable();
+        alert("삭제되었습니다.");
+    }
+}
+
+// 회원 삭제 함수
+function deleteUser(userId) {
+    const target = userList.find(user => user.id === userId);
+    if (!target) return;
+
+    if (confirm(`회원 [${target.name}]님을 정말로 삭제하시겠습니까?`)) {
+        userList = userList.filter(user => user.id !== userId);
+        renderUserTable();
+        alert("회원 정보가 삭제되었습니다.");
+    }
 }

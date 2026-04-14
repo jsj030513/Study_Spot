@@ -50,7 +50,7 @@ const spotData = [
     { id: 73, name: '백석대학교 백석학술정보관', score: 98, type: 'library', typeName: '도서관', lat: 36.837746, lng: 127.184050, wifi: '암호', socket: '많음', free: 90  },
     { id: 74, name: '백석대학교 백석학술정보관', score: 98, type: 'library', typeName: '도서관', lat: 36.838530, lng: 127.182691, wifi: '암호', socket: '많음', free: 88  },
 
-    { id: 42, name: 'CU 안서중앙점', score: 40, type: 'store', typeName: '편의점', lat: 36.8345, lng: 127.1740 },
+    { id: 42, name: 'CU 안서중앙점', score: 40, type: 'store', typeName: '편의점', lat:37.315570, lng: 127.1740 },
     { id: 43, name: 'GS25 안서사거리점', type: 'store', typeName: '편의점', lat: 36.8352, lng: 127.1735 },
     { id: 44, name: '세븐일레븐 안서점', type: 'store', typeName: '편의점', lat: 36.8338, lng: 127.1750 },
     { id: 45, name: '이마트24 안서점', type: 'store', typeName: '편의점', lat: 36.8360, lng: 127.1760 },
