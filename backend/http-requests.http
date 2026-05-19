@@ -1,0 +1,28 @@
+
+### Health check
+GET http://localhost:8080/api/health
+
+### Signup
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "userId": "admin01",
+  "password": "password123",
+  "name": "관리자"
+}
+
+### Login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "userId": "admin01",
+  "password": "password123"
+}
+
+### Cafe search
+GET http://localhost:8080/api/cafes?keyword=백석
+
+### Cafe recommendations
+GET http://localhost:8080/api/recommendations/cafes?wifiStatus=좋음&limit=5
