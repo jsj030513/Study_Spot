@@ -1,9 +1,25 @@
+const BACKEND_URL = `${location.protocol}//${location.hostname}:8080`;
+const API_BASE_URL = location.port === '5500' ? BACKEND_URL : '';
+
+function routeUrl(path) {
+    return location.port === '5500' ? `${BACKEND_URL}${path}` : path;
+}
+
+async function readErrorMessage(response) {
+    try {
+        const data = await response.json();
+        return data.errors?.[0]?.message || data.message || data.error || '요청을 처리하지 못했습니다.';
+    } catch (error) {
+        return '요청을 처리하지 못했습니다.';
+    }
+}
+
 function initMyPage() {
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = getStoredUser();
     
     if (!userData) {
         alert("로그인이 필요한 페이지입니다.");
-        location.href = 'login.html';
+        location.href = routeUrl('/login');
         return;
     }
 
@@ -17,12 +33,30 @@ function initMyPage() {
     renderFavorites();
 }
 
+function getStoredUser() {
+    try {
+        return JSON.parse(localStorage.getItem('user'));
+    } catch (error) {
+        localStorage.removeItem('user');
+        return null;
+    }
+}
+
+function getStoredFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem('myFavorites')) || [];
+    } catch (error) {
+        localStorage.removeItem('myFavorites');
+        return [];
+    }
+}
+
 // 즐겨찾기 목록 렌더링
 function renderFavorites() {
     const favListContainer = document.getElementById('favoriteList');
     if (!favListContainer) return;
 
-    const favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
+    const favorites = getStoredFavorites();
 
     if (favorites.length === 0) {
         favListContainer.innerHTML = `
@@ -38,13 +72,29 @@ function renderFavorites() {
     favorites.forEach(item => {
         const card = document.createElement('div');
         card.className = 'fav-card';
-        card.innerHTML = `
-            <div class="fav-card-top">
-                <span class="fav-name" title="${item.name}">${item.name}</span>
-                <button class="btn-del" onclick="removeFavorite(${item.id})">삭제</button>
-            </div>
-            <button class="btn-view-map" onclick="goToMap(${item.id})">지도에서 확인</button>
-        `;
+
+        const top = document.createElement('div');
+        top.className = 'fav-card-top';
+
+        const name = document.createElement('span');
+        name.className = 'fav-name';
+        name.title = item.name;
+        name.textContent = item.name;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'btn-del';
+        deleteButton.type = 'button';
+        deleteButton.textContent = '삭제';
+        deleteButton.onclick = () => removeFavorite(item.id);
+
+        const viewButton = document.createElement('button');
+        viewButton.className = 'btn-view-map';
+        viewButton.type = 'button';
+        viewButton.textContent = '지도에서 확인';
+        viewButton.onclick = () => goToMap(item.id);
+
+        top.append(name, deleteButton);
+        card.append(top, viewButton);
         favListContainer.appendChild(card);
     });
 }
@@ -52,7 +102,7 @@ function renderFavorites() {
 // 모달 열기
 function openModal() {
     const modal = document.getElementById('editModal');
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = getStoredUser();
     
     if (modal && userData) {
         document.getElementById('editName').value = userData.name;
@@ -67,7 +117,7 @@ function closeModal() {
 }
 
 // 정보 저장
-function saveUserInfo() {
+async function saveUserInfo() {
     const newName = document.getElementById('editName').value;
     
     if (!newName.trim()) {
@@ -75,23 +125,47 @@ function saveUserInfo() {
         return;
     }
 
-    let userData = JSON.parse(localStorage.getItem('user'));
-    userData.name = newName;
-    localStorage.setItem('user', JSON.stringify(userData));
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert("로그인이 필요한 페이지입니다.");
+        location.href = routeUrl('/login');
+        return;
+    }
 
-    alert("성공적으로 수정되었습니다!");
-    closeModal();
-    initMyPage(); // 화면 정보 갱신
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: newName.trim() })
+        });
+
+        if (!response.ok) {
+            alert(await readErrorMessage(response));
+            return;
+        }
+
+        const updatedUser = await response.json();
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+
+        alert("성공적으로 수정되었습니다!");
+        closeModal();
+        initMyPage(); // 화면 정보 갱신
+    } catch (error) {
+        alert('서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.');
+    }
 }
 
 function goToMap(id) {
-    location.href = `main.html?id=${id}`;
+    location.href = `${routeUrl('/main')}?id=${encodeURIComponent(id)}`;
 }
 
 function removeFavorite(id) {
     if (confirm("즐겨찾기에서 삭제하시겠습니까?")) {
-        let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
-        favorites = favorites.filter(f => f.id !== id);
+        let favorites = getStoredFavorites();
+        favorites = favorites.filter(f => String(f.id) !== String(id));
         localStorage.setItem('myFavorites', JSON.stringify(favorites));
         renderFavorites();
     }
@@ -100,7 +174,8 @@ function removeFavorite(id) {
 function handleLogout() {
     if (confirm("로그아웃 하시겠습니까?")) {
         localStorage.removeItem('user');
-        location.href = 'main.html';
+        localStorage.removeItem('authToken');
+        location.href = routeUrl('/main');
     }
 }
 

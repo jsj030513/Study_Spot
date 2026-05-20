@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "StudySpotApplication",
+            "request": "launch",
+            "mainClass": "com.studyspot.StudySpotApplication",
+            "projectName": "study-spot-backend",
+            "cwd": "${workspaceFolder}/backend",
+            "env": {
+                "DB_PASSWORD": "1234"
+            }
+        }
+    ]
+}

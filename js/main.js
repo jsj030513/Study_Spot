@@ -3,8 +3,8 @@
  * 작성자: 장성주 (Baekseok Univ. Software '22)
  */
 
-// 1. 장소 데이터 (WIFI: 빵빵함/보통/없음, Socket: 많음/보통/적음/없음)
-const spotData = [
+// 1. 장소 데이터 (WIFI: 빵빵함/보통/없음, Socket: 많음/보통/적/음/없음)
+/**const spotData = [
     { id: 1, name: '안라커피', score: 85, type: 'cafe', typeName: '카페', lat: 36.833450, lng: 127.173136, wifi: '보통', socket: '적음', free: 30 },
     { id: 2, name: '카페고메', score: 90, type: 'cafe', typeName: '카페', lat: 36.834127, lng: 127.172958, wifi: '좋음', socket: '많음', free: 60 },
     { id: 3, name: '사람 그리고 이야기', score: 88, type: 'cafe', typeName: '카페', lat: 36.834812, lng: 127.172922, wifi: '좋음', socket: '보통', free: 55 },
@@ -84,28 +84,37 @@ const spotData = [
     { id: 71, name: '상명대 구내매점/문구', score: 80, type: 'stationery', typeName: '교내문구', lat: 36.8328, lng: 127.1775, desc: '기본 필기구 및 소모품' },
     { id: 72, name: '단국대 구내매점/문구', score: 82, type: 'ststationeryore', typeName: '교내문구', lat: 36.8362, lng: 127.1670, desc: '교내 문구 및 사무용품' }
 ];
-
+*/
 let map;
 let overlays = [];
+let spotData = [];
 let selectedSpotForNav = null;
 let isLoggedIn = false;
 let userName = "";
+let isMapReady = false;
+const BACKEND_URL = `${location.protocol}//${location.hostname}:8080`;
+const API_BASE_URL = location.port === '5500' ? BACKEND_URL : '';
 
-function init() {
-    const userData = JSON.parse(localStorage.getItem('user'));
+function routeUrl(path) {
+    return location.port === '5500' ? `${BACKEND_URL}${path}` : path;
+}
+
+async function init() {
+    const userData = getStoredUser();
     if (userData) {
         isLoggedIn = true;
         userName = userData.name;
     }
 
     initMap();
+    await loadSpots();
 
     const urlParams = new URLSearchParams(window.location.search);
     const targetId = urlParams.get('id');
 
     if (targetId) {
-        renderSpots('all', '', parseInt(targetId));
-        setTimeout(() => selectSpotById(parseInt(targetId)), 300);
+        renderSpots('all', '', targetId);
+        setTimeout(() => selectSpotById(targetId), 300);
     } else {
         renderSpots('all');
     }
@@ -114,10 +123,80 @@ function init() {
     updateHeader();
 }
 
+function getStoredUser() {
+    try {
+        return JSON.parse(localStorage.getItem('user'));
+    } catch (error) {
+        localStorage.removeItem('user');
+        return null;
+    }
+}
+
 function initMap() {
     const container = document.getElementById('kakaoMap');
+    if (!container) return;
+
+    if (!window.kakao?.maps) {
+        const message = window.kakaoMapSdkFailed
+            ? '카카오맵 SDK 로딩에 실패했습니다.'
+            : '카카오맵을 불러오지 못했습니다.';
+        showMapFallback(message);
+        return;
+    }
+
     const options = { center: new kakao.maps.LatLng(36.8360, 127.1750), level: 4 };
-    map = new kakao.maps.Map(container, options);
+    try {
+        map = new kakao.maps.Map(container, options);
+        isMapReady = true;
+    } catch (error) {
+        showMapFallback('지도를 초기화하지 못했습니다.');
+    }
+}
+
+function showMapFallback(message) {
+    const container = document.getElementById('kakaoMap');
+    if (!container) return;
+
+    container.style.display = 'grid';
+    container.style.placeItems = 'center';
+    container.style.color = '#64748b';
+    container.style.fontWeight = '700';
+    container.textContent = message;
+}
+
+async function loadSpots() {
+    const spotList = document.getElementById('spotList');
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/cafes`);
+        if (!response.ok) throw new Error('장소 목록을 불러오지 못했습니다.');
+
+        const cafes = await response.json();
+        spotData = cafes
+            .map(cafe => ({
+                id: cafe.cafeId,
+                name: cafe.name,
+                score: cafe.recommendScore,
+                type: 'cafe',
+                typeName: '카페',
+                lat: Number(cafe.latitude),
+                lng: Number(cafe.longitude),
+                wifi: cafe.facility?.wifiStatus,
+                socket: cafe.facility?.outletFlag,
+                address: cafe.address,
+                telNo: cafe.telNo
+            }))
+            .filter(spot => Number.isFinite(spot.lat) && Number.isFinite(spot.lng));
+    } catch (error) {
+        spotData = [];
+        if (spotList) {
+            spotList.innerHTML = `
+                <div style="padding:24px; color:#ef4444; text-align:center;">
+                    장소 데이터를 불러오지 못했습니다. 백엔드와 DB 연결을 확인해주세요.
+                </div>
+            `;
+        }
+    }
 }
 
 // 필터링 및 검색 로직 통합
@@ -132,7 +211,7 @@ function renderSpots(filterType, keyword = '', targetId = null) {
     const filtered = spotData.filter(spot => {
         const isTypeMatch = filterType === 'all' || spot.type === filterType;
         const isNameMatch = spot.name.toLowerCase().includes(keyword.toLowerCase());
-        const isTargetMatch = targetId ? spot.id === targetId : true;
+        const isTargetMatch = targetId ? String(spot.id) === String(targetId) : true;
         return isTypeMatch && isNameMatch && isTargetMatch;
     });
 
@@ -140,42 +219,85 @@ function renderSpots(filterType, keyword = '', targetId = null) {
         const notice = document.createElement('div');
         notice.style = "padding:10px; background:#eef2ff; font-size:0.8rem; text-align:center; cursor:pointer; color:#3182f6;";
         notice.innerHTML = "<b>[공부명당]</b> 전체 목록 보기 ↺";
-        notice.onclick = () => location.href = 'main.html';
+        notice.onclick = () => location.href = routeUrl('/main');
         spotList.appendChild(notice);
     }
 
     filtered.forEach(spot => {
         const card = document.createElement('div');
         card.className = 'spot-card';
-        card.innerHTML = `
-            <div class="card-top"><span class="card-name">${spot.name}</span><span class="score-badge">${spot.score}점</span></div>
-            <div style="font-size:0.75rem; color:#636e72;">📶 ${spot.wifi || '보통'} | 🔌 ${spot.socket || '보통'}</div>
-        `;
+        card.append(createSpotCardTop(spot), createSpotMeta(spot));
         card.onclick = () => selectSpot(spot);
         spotList.appendChild(card);
 
-        const score = spot.score || 0;
-        let scoreClass = (score >= 90) ? 'high' : (score >= 80 ? 'mid' : 'low');
-        const overlay = new kakao.maps.CustomOverlay({
-            position: new kakao.maps.LatLng(spot.lat, spot.lng),
-            content: `<div class="map-marker-wrapper" onclick="selectSpotById(${spot.id})">
-                        <div class="score-pin ${scoreClass}"><span>${score}</span></div>
-                        <div class="marker-title">${spot.name}</div>
-                      </div>`,
-            yAnchor: 1.2
-        });
-        overlay.setMap(map);
-        overlays.push(overlay);
+        if (isMapReady) {
+            const score = spot.score || 0;
+            let scoreClass = (score >= 90) ? 'high' : (score >= 80 ? 'mid' : 'low');
+            const marker = createMarker(spot, scoreClass, score);
+            const overlay = new kakao.maps.CustomOverlay({
+                position: new kakao.maps.LatLng(spot.lat, spot.lng),
+                content: marker,
+                yAnchor: 1.2
+            });
+            overlay.setMap(map);
+            overlays.push(overlay);
+        }
     });
 }
 
+function createSpotCardTop(spot) {
+    const top = document.createElement('div');
+    top.className = 'card-top';
+
+    const name = document.createElement('span');
+    name.className = 'card-name';
+    name.textContent = spot.name;
+
+    const score = document.createElement('span');
+    score.className = 'score-badge';
+    score.textContent = `${spot.score || 0}점`;
+
+    top.append(name, score);
+    return top;
+}
+
+function createSpotMeta(spot) {
+    const meta = document.createElement('div');
+    meta.style.fontSize = '0.75rem';
+    meta.style.color = '#636e72';
+    meta.textContent = `📶 ${spot.wifi || '보통'} | 🔌 ${spot.socket || '보통'}`;
+    return meta;
+}
+
+function createMarker(spot, scoreClass, score) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'map-marker-wrapper';
+    wrapper.onclick = () => selectSpotById(spot.id);
+
+    const pin = document.createElement('div');
+    pin.className = `score-pin ${scoreClass}`;
+
+    const scoreText = document.createElement('span');
+    scoreText.textContent = score;
+
+    const title = document.createElement('div');
+    title.className = 'marker-title';
+    title.textContent = spot.name;
+
+    pin.appendChild(scoreText);
+    wrapper.append(pin, title);
+    return wrapper;
+}
+
 function selectSpot(spot) {
-    map.panTo(new kakao.maps.LatLng(spot.lat, spot.lng));
+    if (isMapReady) {
+        map.panTo(new kakao.maps.LatLng(spot.lat, spot.lng));
+    }
     openDetail(spot);
 }
 
 window.selectSpotById = function (id) {
-    const spot = spotData.find(s => s.id === id);
+    const spot = spotData.find(s => String(s.id) === String(id));
     if (spot) selectSpot(spot);
 };
 
@@ -195,14 +317,24 @@ window.startNavigation = () => {
 };
 
 window.toggleFavorite = () => {
+    if (!selectedSpotForNav) return;
     if (!isLoggedIn) { alert("로그인이 필요합니다."); return; }
-    let favorites = JSON.parse(localStorage.getItem('myFavorites')) || [];
-    if (!favorites.some(f => f.id === selectedSpotForNav.id)) {
+    let favorites = getStoredFavorites();
+    if (!favorites.some(f => String(f.id) === String(selectedSpotForNav.id))) {
         favorites.push({ id: selectedSpotForNav.id, name: selectedSpotForNav.name });
         localStorage.setItem('myFavorites', JSON.stringify(favorites));
         alert("즐겨찾기에 추가되었습니다.");
     }
 };
+
+function getStoredFavorites() {
+    try {
+        return JSON.parse(localStorage.getItem('myFavorites')) || [];
+    } catch (error) {
+        localStorage.removeItem('myFavorites');
+        return [];
+    }
+}
 
 // [수정됨] 이벤트 설정 함수 - 검색창 실시간 연동 포함
 function setupEvents() {
@@ -232,18 +364,51 @@ function setupEvents() {
 function updateHeader() {
     const navLinks = document.querySelector('.nav-links');
     if (isLoggedIn && navLinks) {
-        navLinks.innerHTML = `
-            <li><a href="main.html" style="color:var(--accent);">탐색하기</a></li>
-            <li><a href="mypage.html">마이페이지</a></li>
-            <li><a href="#" onclick="handleLogout(event)">로그아웃</a></li>
-            <li style="margin-left:15px; font-size:0.9rem;"><b>${userName}</b>님</li>
-        `;
+        navLinks.replaceChildren(
+            createNavItem('탐색하기', routeUrl('/main'), true),
+            createNavItem('마이페이지', routeUrl('/mypage')),
+            createLogoutNavItem(),
+            createUserNameNavItem(userName)
+        );
     }
 }
 
+function createNavItem(text, href, active = false) {
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = href;
+    link.textContent = text;
+    if (active) link.style.color = 'var(--accent)';
+    item.appendChild(link);
+    return item;
+}
+
+function createLogoutNavItem() {
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = '#';
+    link.textContent = '로그아웃';
+    link.onclick = window.handleLogout;
+    item.appendChild(link);
+    return item;
+}
+
+function createUserNameNavItem(name) {
+    const item = document.createElement('li');
+    item.style.marginLeft = '15px';
+    item.style.fontSize = '0.9rem';
+
+    const strong = document.createElement('b');
+    strong.textContent = name;
+
+    item.append(strong, '님');
+    return item;
+}
+
 window.handleLogout = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
     location.reload();
 };
 

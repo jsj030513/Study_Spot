@@ -12,14 +12,14 @@
     <div class="grid-bg"></div>
 
     <nav>
-        <div class="nav-logo" onclick="location.href='main.html'">
+        <div class="nav-logo" onclick="location.href='/main'">
             <div class="logo-badge">📍</div>
             <span class="logo-text"><span>공부</span>명당</span>
         </div>
         <ul class="nav-links">
-            <li><a href="main.html" style="color:var(--accent);">탐색하기</a></li>
-            <li><a href="login.html">로그인</a></li>
-            <li><a href="join.html">회원가입</a></li>
+            <li><a href="/main" style="color:var(--accent);">탐색하기</a></li>
+            <li><a href="/login">로그인</a></li>
+            <li><a href="/join">회원가입</a></li>
         </ul>
     </nav>
 
@@ -65,7 +65,14 @@
         </div>
     </div>
 
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=b84a7c66e4422dfe8d914c174dbddef4"></script>
+    <script>
+        window.kakaoMapSdkFailed = false;
+    </script>
+    <script
+        type="text/javascript"
+        src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=b84a7c66e4422dfe8d914c174dbddef4"
+        onerror="window.kakaoMapSdkFailed = true"
+    ></script>
     <script src="../js/main.js"></script>
 </body>
 </html>
