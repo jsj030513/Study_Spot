@@ -110,6 +110,10 @@ public class UserRepository {
         }
     }
 
+    public void updateRole(String userId, String role) {
+        jdbcTemplate.update("UPDATE user_master SET ROLE_TY = ? WHERE USER_ID = ?", role, userId);
+    }
+
     public void delete(String userId) {
         jdbcTemplate.update("DELETE FROM user_master WHERE USER_ID = ?", userId);
     }

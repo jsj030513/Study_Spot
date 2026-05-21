@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.studyspot.auth.AuthUser;
 import com.studyspot.auth.LoginUser;
 import com.studyspot.common.ApiException;
+import com.studyspot.owner.OwnerVerificationResponse;
+import com.studyspot.owner.OwnerVerificationReviewRequest;
+import com.studyspot.owner.OwnerVerificationService;
+import com.studyspot.place.PlaceService;
 import com.studyspot.user.AdminUpdateUserRequest;
 import com.studyspot.user.UserResponse;
 import com.studyspot.user.UserService;
@@ -23,33 +27,58 @@ import com.studyspot.user.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private final UserService userService;
+    private final PlaceService placeService;
+    private final OwnerVerificationService ownerVerificationService;
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, PlaceService placeService,
+            OwnerVerificationService ownerVerificationService) {
         this.userService = userService;
+        this.placeService = placeService;
+        this.ownerVerificationService = ownerVerificationService;
     }
 
-    @GetMapping
+    @GetMapping("/summary")
+    public AdminSummaryResponse summary(@LoginUser AuthUser authUser) {
+        assertAdmin(authUser);
+        return new AdminSummaryResponse(userService.countUsers(), placeService.countPlaces());
+    }
+
+    @GetMapping("/users")
     public List<UserResponse> findUsers(@LoginUser AuthUser authUser, @RequestParam(required = false) String keyword) {
         assertAdmin(authUser);
         return userService.findUsers(keyword);
     }
 
-    @PatchMapping("/{userId}")
+    @PatchMapping("/users/{userId}")
     public UserResponse updateUser(@LoginUser AuthUser authUser, @PathVariable String userId,
             @Valid @RequestBody AdminUpdateUserRequest request) {
         assertAdmin(authUser);
         return userService.updateByAdmin(userId, request);
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@LoginUser AuthUser authUser, @PathVariable String userId) {
         assertAdmin(authUser);
         userService.deleteByAdmin(userId);
+    }
+
+    @GetMapping("/owner-verifications")
+    public List<OwnerVerificationResponse> findOwnerVerifications(@LoginUser AuthUser authUser,
+            @RequestParam(required = false) String status) {
+        assertAdmin(authUser);
+        return ownerVerificationService.findAll(status);
+    }
+
+    @PatchMapping("/owner-verifications/{verificationId}")
+    public OwnerVerificationResponse reviewOwnerVerification(@LoginUser AuthUser authUser,
+            @PathVariable String verificationId, @Valid @RequestBody OwnerVerificationReviewRequest request) {
+        assertAdmin(authUser);
+        return ownerVerificationService.review(verificationId, request);
     }
 
     private void assertAdmin(AuthUser authUser) {

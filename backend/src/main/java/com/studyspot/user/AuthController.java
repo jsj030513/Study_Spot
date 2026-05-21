@@ -1,6 +1,8 @@
 package com.studyspot.user;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,11 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse signup(@Valid @RequestBody SignupRequest request) {
         return userService.signup(request);
+    }
+
+    @GetMapping("/user-ids/{userId}/availability")
+    public UserIdAvailabilityResponse checkUserId(@PathVariable String userId) {
+        return userService.checkUserIdAvailability(userId);
     }
 
     @PostMapping("/login")

@@ -7,8 +7,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.studyspot.auth.AuthUser;
 import com.studyspot.auth.AuthTokenService;
+import com.studyspot.auth.AuthUser;
 import com.studyspot.common.ApiException;
 
 @Service
@@ -44,6 +44,14 @@ public class UserService {
         return new LoginResponse(token, UserResponse.from(user));
     }
 
+    public UserIdAvailabilityResponse checkUserIdAvailability(String userId) {
+        String normalizedUserId = blankToNull(userId);
+        if (normalizedUserId == null || !normalizedUserId.matches("^[A-Za-z0-9_]{4,20}$")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "아이디는 영문, 숫자, 밑줄로 4~20자여야 합니다.");
+        }
+        return new UserIdAvailabilityResponse(normalizedUserId, !userRepository.existsById(normalizedUserId));
+    }
+
     public UserResponse getMe(String userId) {
         return UserResponse.from(findUser(userId));
     }
@@ -70,6 +78,16 @@ public class UserService {
 
     public List<UserResponse> findUsers(String keyword) {
         return userRepository.findAll(keyword).stream().map(UserResponse::from).toList();
+    }
+
+    public long countUsers() {
+        return userRepository.count();
+    }
+
+    @Transactional
+    public void grantOwnerRole(String userId) {
+        findUser(userId);
+        userRepository.updateRole(userId, "O");
     }
 
     @Transactional
