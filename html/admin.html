@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>공부명당 | 통합 관리 센터</title>
-    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="stylesheet" href="../css/admin.css?v=20260521-admin-review-owner">
 </head>
 <body>
     <nav class="admin-nav">
@@ -13,6 +13,8 @@
             <div class="nav-menu">
                 <button class="menu-btn active" id="btnSpotMode" onclick="switchMode('spot')">장소 관리</button>
                 <button class="menu-btn" id="btnUserMode" onclick="switchMode('user')">회원 관리</button>
+                <button class="menu-btn" id="btnReviewMode" onclick="switchMode('review')">한줄평 관리</button>
+                <button class="menu-btn" id="btnOwnerMode" onclick="switchMode('owner')">사장님 신청</button>
             </div>
         </div>
         <div class="user-info">
@@ -53,7 +55,7 @@
             <section class="management-section">
                 <div class="section-header">
                     <h2><span id="currentCategoryTitle">전체</span> 목록 관리</h2>
-                    <button class="btn-primary" onclick="toggleModal(true)">+ 새 장소 추가</button>
+                    <button class="btn-primary" onclick="loadPlaces()">새로고침</button>
                 </div>
                 <table class="data-table">
                     <thead>
@@ -69,7 +71,7 @@
                 <div class="section-header">
                     <h2>전체 회원 관리</h2>
                     <div class="search-box">
-                        <input type="text" id="userSearch" placeholder="회원 이름/이메일 검색" onkeyup="searchUser()">
+                        <input type="text" id="userSearch" placeholder="회원 이름/아이디 검색" onkeyup="loadUsers()">
                     </div>
                 </div>
                 <table class="data-table">
@@ -87,8 +89,57 @@
                 </table>
             </section>
         </div>
+
+        <div id="reviewSection" style="display: none;">
+            <section class="management-section">
+                <div class="section-header">
+                    <h2>한줄평 클린봇 관리</h2>
+                    <button class="btn-primary" onclick="loadReviews()">새로고침</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>카페</th>
+                            <th>작성자</th>
+                            <th>한줄평</th>
+                            <th>감정</th>
+                            <th>클린봇</th>
+                            <th>작성일</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewTableBody"></tbody>
+                </table>
+            </section>
+        </div>
+
+        <div id="ownerSection" style="display: none;">
+            <section class="management-section">
+                <div class="section-header">
+                    <h2>카페 사장님 가입 신청</h2>
+                    <div class="filter-actions">
+                        <button class="btn-secondary" onclick="loadOwnerVerifications('')">전체</button>
+                        <button class="btn-secondary" onclick="loadOwnerVerifications('PENDING')">대기</button>
+                        <button class="btn-secondary" onclick="loadOwnerVerifications('APPROVED')">승인</button>
+                        <button class="btn-secondary" onclick="loadOwnerVerifications('REJECTED')">반려</button>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>신청자</th>
+                            <th>신청 카페</th>
+                            <th>사업자번호</th>
+                            <th>증빙서류</th>
+                            <th>상태</th>
+                            <th>검토</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ownerVerificationTableBody"></tbody>
+                </table>
+            </section>
+        </div>
     </main>
 
-    <script src="../js/admin.js"></script>
+    <script src="../js/admin.js?v=20260521-adminlogin-auth"></script>
 </body>
 </html>

@@ -5,6 +5,16 @@ function routeUrl(path) {
     return location.port === '5500' ? `${BACKEND_URL}${path}` : path;
 }
 
+function bindAccountTypeCards(name) {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+        input.addEventListener('change', () => {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(item => {
+                item.closest('.account-type-card')?.classList.toggle('active', item.checked);
+            });
+        });
+    });
+}
+
 async function readErrorMessage(response) {
     try {
         const data = await response.json();
@@ -14,11 +24,14 @@ async function readErrorMessage(response) {
     }
 }
 
+bindAccountTypeCards('loginType');
+
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const userId = document.getElementById('userId').value;
     const userPw = document.getElementById('userPw').value;
+    const loginType = document.querySelector('input[name="loginType"]:checked')?.value || 'user';
 
     if (!userId || !userPw) {
         alert('아이디와 비밀번호를 모두 입력해주세요.');
@@ -40,6 +53,17 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         const data = await response.json();
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+
+        if (loginType === 'owner') {
+            if (data.user.role === 'O' || data.user.role === 'A') {
+                alert(`${data.user.name} 사장님, 관리 페이지로 이동합니다.`);
+                location.href = routeUrl('/owner');
+                return;
+            }
+
+            alert('아직 승인된 사업자 계정이 아닙니다. 사업자 회원가입 또는 관리자 승인을 확인해주세요.');
+            return;
+        }
 
         alert(`${data.user.name}님, 공부명당에 오신 것을 환영합니다!`);
         location.href = routeUrl('/main');

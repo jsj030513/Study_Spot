@@ -18,6 +18,17 @@
         </div>
 
         <form class="login-form" id="loginForm">
+            <div class="account-type-group" role="radiogroup" aria-label="로그인 유형">
+                <label class="account-type-card active">
+                    <input type="radio" name="loginType" value="user" checked>
+                    <span>이용자</span>
+                </label>
+                <label class="account-type-card">
+                    <input type="radio" name="loginType" value="owner">
+                    <span>사업자</span>
+                </label>
+            </div>
+
             <div class="input-group">
                 <label for="userId">아이디</label>
                 <input type="text" id="userId" placeholder="아이디를 입력하세요" required>

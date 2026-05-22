@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공부명당 — 관리자 로그인</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/login.css?v=20260521-adminlogin">
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="login-container admin-login-container">
+        <div class="login-header" onclick="location.href='/main'">
+            <div class="logo-badge">📍</div>
+            <h1 class="logo-text"><span>공부</span>명당 Admin</h1>
+            <p class="login-subtitle">관리자 전용 페이지입니다.</p>
+        </div>
+
+        <form class="login-form" id="adminLoginForm">
+            <div class="admin-login-notice">
+                관리자 계정으로만 접근할 수 있습니다.
+            </div>
+
+            <div class="input-group">
+                <label for="adminId">관리자 아이디</label>
+                <input type="text" id="adminId" placeholder="관리자 아이디를 입력하세요" required>
+            </div>
+            <div class="input-group">
+                <label for="adminPw">비밀번호</label>
+                <input type="password" id="adminPw" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <button type="submit" class="login-btn">관리자 로그인</button>
+        </form>
+
+        <div class="login-footer">
+            <a href="/login">일반 로그인으로 이동</a>
+        </div>
+    </div>
+
+    <script src="../js/adminlogin.js?v=20260521-adminlogin"></script>
+</body>
+</html>

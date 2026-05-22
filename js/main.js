@@ -99,6 +99,15 @@ function routeUrl(path) {
     return location.port === '5500' ? `${BACKEND_URL}${path}` : path;
 }
 
+async function readErrorMessage(response) {
+    try {
+        const data = await response.json();
+        return data.errors?.[0]?.message || data.message || data.error || '요청을 처리하지 못했습니다.';
+    } catch (error) {
+        return '요청을 처리하지 못했습니다.';
+    }
+}
+
 async function init() {
     const userData = getStoredUser();
     if (userData) {
@@ -168,25 +177,34 @@ async function loadSpots() {
     const spotList = document.getElementById('spotList');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/cafes`);
+        const response = await fetch(`${API_BASE_URL}/api/places`);
         if (!response.ok) throw new Error('장소 목록을 불러오지 못했습니다.');
 
-        const cafes = await response.json();
-        spotData = cafes
-            .map(cafe => ({
-                id: cafe.cafeId,
-                name: cafe.name,
-                score: cafe.recommendScore,
-                type: 'cafe',
-                typeName: '카페',
-                lat: Number(cafe.latitude),
-                lng: Number(cafe.longitude),
-                wifi: cafe.facility?.wifiStatus,
-                socket: cafe.facility?.outletFlag,
-                address: cafe.address,
-                telNo: cafe.telNo
+        const places = await response.json();
+        spotData = places
+            .map(place => ({
+                id: place.placeId,
+                name: place.name,
+                score: place.recommendScore,
+                type: place.type,
+                typeName: place.typeName,
+                lat: Number(place.latitude),
+                lng: Number(place.longitude),
+                wifi: place.wifiStatus,
+                socket: place.outletStatus,
+                noise: place.noiseLevel,
+                address: place.address,
+                telNo: place.telNo,
+                description: place.description,
+                openStatus: null,
+                profile: null,
+                recentReviews: [],
+                sentiment: createDefaultSentiment(place.recommendScore),
+                oneLineReview: place.description || createDefaultOneLine(place)
             }))
             .filter(spot => Number.isFinite(spot.lat) && Number.isFinite(spot.lng));
+
+        await hydrateCafeReviews();
     } catch (error) {
         spotData = [];
         if (spotList) {
@@ -197,6 +215,73 @@ async function loadSpots() {
             `;
         }
     }
+}
+
+async function hydrateCafeReviews() {
+    const cafes = spotData.filter(spot => spot.type === 'cafe');
+    await Promise.all(cafes.map(async (spot) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/places/${spot.id}/reviews`);
+            if (!response.ok) return;
+
+            const reviews = await response.json();
+            applyReviewSummary(spot, reviews);
+        } catch (error) {
+            // 리뷰가 없어도 장소 목록은 보여야 합니다.
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/places/${spot.id}/open-status`);
+            if (!response.ok) return;
+            spot.openStatus = await response.json();
+        } catch (error) {
+            // 영업 상태가 없어도 장소 목록은 보여야 합니다.
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/places/${spot.id}/profile`);
+            if (!response.ok) return;
+            spot.profile = await response.json();
+        } catch (error) {
+            // 프로필이 없어도 장소 목록은 보여야 합니다.
+        }
+    }));
+}
+
+function applyReviewSummary(spot, reviews) {
+    if (!Array.isArray(reviews) || reviews.length === 0) return;
+
+    const positiveCount = reviews.filter(review => review.sentiment === 'POSITIVE' || review.faceType === 'positive').length;
+    const negativeCount = reviews.filter(review => review.sentiment === 'NEGATIVE' || review.faceType === 'negative').length;
+    const visibleReviews = reviews.filter(review => review.content);
+    const latestReview = visibleReviews[0];
+
+    spot.sentiment = {
+        type: positiveCount >= negativeCount ? 'positive' : 'negative',
+        label: positiveCount >= negativeCount ? '긍정 평가' : '부정 평가',
+        positiveCount,
+        negativeCount
+    };
+    spot.recentReviews = visibleReviews.slice(0, 3);
+    spot.oneLineReview = latestReview?.content || createDefaultOneLine(spot);
+}
+
+function createDefaultSentiment(score = 0) {
+    return {
+        type: score >= 75 ? 'positive' : 'negative',
+        label: score >= 75 ? '긍정 평가' : '부정 평가',
+        positiveCount: 0,
+        negativeCount: 0
+    };
+}
+
+function createDefaultOneLine(place) {
+    const typeName = place.typeName || '장소';
+    const score = place.recommendScore ?? place.score ?? 0;
+    if (score >= 80) {
+        return `${typeName} 이용자에게 무난하게 추천할 수 있는 장소입니다.`;
+    }
+    return `${typeName} 이용 전 시설과 분위기를 한 번 더 확인해보세요.`;
 }
 
 // 필터링 및 검색 로직 통합
@@ -231,9 +316,7 @@ function renderSpots(filterType, keyword = '', targetId = null) {
         spotList.appendChild(card);
 
         if (isMapReady) {
-            const score = spot.score || 0;
-            let scoreClass = (score >= 90) ? 'high' : (score >= 80 ? 'mid' : 'low');
-            const marker = createMarker(spot, scoreClass, score);
+            const marker = createMarker(spot);
             const overlay = new kakao.maps.CustomOverlay({
                 position: new kakao.maps.LatLng(spot.lat, spot.lng),
                 content: marker,
@@ -254,8 +337,11 @@ function createSpotCardTop(spot) {
     name.textContent = spot.name;
 
     const score = document.createElement('span');
-    score.className = 'score-badge';
-    score.textContent = `${spot.score || 0}점`;
+    const sentiment = getSentimentView(spot);
+    score.className = `face-badge ${sentiment.type}`;
+    score.textContent = sentiment.face;
+    score.title = sentiment.label;
+    score.setAttribute('aria-label', sentiment.label);
 
     top.append(name, score);
     return top;
@@ -265,20 +351,21 @@ function createSpotMeta(spot) {
     const meta = document.createElement('div');
     meta.style.fontSize = '0.75rem';
     meta.style.color = '#636e72';
-    meta.textContent = `📶 ${spot.wifi || '보통'} | 🔌 ${spot.socket || '보통'}`;
+    meta.textContent = `${spot.typeName || '장소'} | ${usageTimeLabel(spot)}`;
     return meta;
 }
 
-function createMarker(spot, scoreClass, score) {
+function createMarker(spot) {
     const wrapper = document.createElement('div');
     wrapper.className = 'map-marker-wrapper';
     wrapper.onclick = () => selectSpotById(spot.id);
 
     const pin = document.createElement('div');
-    pin.className = `score-pin ${scoreClass}`;
+    const sentiment = getSentimentView(spot);
+    pin.className = `face-pin ${sentiment.type}`;
 
     const scoreText = document.createElement('span');
-    scoreText.textContent = score;
+    scoreText.textContent = sentiment.face;
 
     const title = document.createElement('div');
     title.className = 'marker-title';
@@ -287,6 +374,16 @@ function createMarker(spot, scoreClass, score) {
     pin.appendChild(scoreText);
     wrapper.append(pin, title);
     return wrapper;
+}
+
+function getSentimentView(spot) {
+    const sentiment = spot.sentiment || createDefaultSentiment(spot.score);
+    const isPositive = sentiment.type === 'positive';
+    return {
+        type: isPositive ? 'positive' : 'negative',
+        face: isPositive ? '😊' : '😟',
+        label: sentiment.label || (isPositive ? '긍정 평가' : '부정 평가')
+    };
 }
 
 function selectSpot(spot) {
@@ -303,9 +400,147 @@ window.selectSpotById = function (id) {
 
 function openDetail(spot) {
     selectedSpotForNav = spot;
+    const sentiment = getSentimentView(spot);
     document.getElementById('detailName').innerText = spot.name;
-    document.getElementById('detailScore').innerText = spot.score;
+    document.getElementById('detailScore').innerText = sentiment.face;
+    document.getElementById('detailScore').className = `big-score face-detail ${sentiment.type}`;
+    const scoreBars = document.getElementById('scoreBars');
+    if (scoreBars) {
+        const positiveCount = spot.sentiment?.positiveCount || 0;
+        const negativeCount = spot.sentiment?.negativeCount || 0;
+        scoreBars.innerHTML = `
+            <div class="detail-review-counts">
+                <span>😊 ${positiveCount}개</span>
+                <span>😟 ${negativeCount}개</span>
+                <span>${escapeHtml(spot.typeName || '장소')} | ${escapeHtml(usageTimeLabel(spot))}</span>
+            </div>
+            ${spot.openStatus?.message ? `<p class="detail-open-message">${escapeHtml(spot.openStatus.message)}</p>` : ''}
+            ${createRecentReviewMarkup(spot)}
+            ${createReviewComposer(spot)}
+        `;
+    }
     document.getElementById('detailPanel').classList.add('open');
+}
+
+function createRecentReviewMarkup(spot) {
+    const reviews = spot.recentReviews || [];
+    if (!reviews.length) {
+        return `<p class="detail-one-line">${escapeHtml(spot.oneLineReview || createDefaultOneLine(spot))}</p>`;
+    }
+
+    return `
+        <div class="recent-review-panel">
+            <strong>최근 한줄평</strong>
+            <ul class="recent-review-list">
+                ${reviews.map(review => `<li>${escapeHtml(review.content)}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+}
+
+function createReviewComposer(spot) {
+    if (spot.type !== 'cafe') {
+        return '<p class="review-guide">한줄평은 카페에만 등록할 수 있습니다.</p>';
+    }
+
+    const user = getStoredUser();
+    if (!user) {
+        return `
+            <div class="review-composer locked">
+                <p>일반 사용자로 로그인하면 이 카페에 한줄평을 남길 수 있습니다.</p>
+                <button type="button" onclick="location.href='${routeUrl('/login')}'">로그인하기</button>
+            </div>
+        `;
+    }
+
+    if (user.role !== 'U') {
+        return '<p class="review-guide">한줄평 등록은 일반 사용자 계정에서만 가능합니다.</p>';
+    }
+
+    return `
+        <div class="review-composer">
+            <label for="reviewContent">한줄평 남기기</label>
+            <div class="review-input-row">
+                <input id="reviewContent" type="text" maxlength="100" placeholder="이 카페의 공부 분위기를 한 줄로 남겨주세요.">
+                <button type="button" onclick="submitCafeReview()">등록</button>
+            </div>
+        </div>
+    `;
+}
+
+window.submitCafeReview = async () => {
+    if (!selectedSpotForNav || selectedSpotForNav.type !== 'cafe') return;
+
+    const input = document.getElementById('reviewContent');
+    const content = input?.value.trim() || '';
+    const token = localStorage.getItem('authToken');
+    const user = getStoredUser();
+
+    if (!user || !token) {
+        alert('로그인이 필요합니다.');
+        location.href = routeUrl('/login');
+        return;
+    }
+
+    if (user.role !== 'U') {
+        alert('한줄평은 일반 사용자 계정에서만 등록할 수 있습니다.');
+        return;
+    }
+
+    if (!content) {
+        alert('한줄평을 입력해주세요.');
+        input?.focus();
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/places/${selectedSpotForNav.id}/reviews`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content })
+        });
+
+        if (!response.ok) {
+            alert(await readErrorMessage(response));
+            return;
+        }
+
+        const reviewsResponse = await fetch(`${API_BASE_URL}/api/places/${selectedSpotForNav.id}/reviews`);
+        if (reviewsResponse.ok) {
+            applyReviewSummary(selectedSpotForNav, await reviewsResponse.json());
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const activeChip = document.querySelector('.category-chip.active');
+        renderSpots(activeChip?.dataset.type || 'all', searchInput?.value || '');
+        openDetail(selectedSpotForNav);
+        alert('한줄평이 등록되었습니다.');
+    } catch (error) {
+        alert('서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.');
+    }
+};
+
+function openStatusLabel(status) {
+    if (!status) return '영업상태 미등록';
+    return status.open ? '영업중' : '마감';
+}
+
+function usageTimeLabel(spot) {
+    const openingHours = spot.profile?.openingHours?.trim();
+    if (openingHours) return openingHours;
+    return '이용시간 미등록';
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 }
 
 window.closeDetail = () => document.getElementById('detailPanel').classList.remove('open');
@@ -364,11 +599,20 @@ function setupEvents() {
 function updateHeader() {
     const navLinks = document.querySelector('.nav-links');
     if (isLoggedIn && navLinks) {
-        navLinks.replaceChildren(
-            createNavItem('탐색하기', routeUrl('/main'), true),
+        const user = getStoredUser();
+        const items = [
+            createNavItem('탐색하기', routeUrl('/main'), true)
+        ];
+        if (user?.role === 'O' || user?.role === 'A') {
+            items.push(createNavItem('사장님 페이지', routeUrl('/owner')));
+        }
+        items.push(
             createNavItem('마이페이지', routeUrl('/mypage')),
             createLogoutNavItem(),
             createUserNameNavItem(userName)
+        );
+        navLinks.replaceChildren(
+            ...items
         );
     }
 }

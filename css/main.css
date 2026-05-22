@@ -165,12 +165,48 @@ nav {
 }
 
 .card-name { font-weight: 700; font-size: 1.05rem; }
-.score-badge {
-    background: #f0f4f8;
+.face-badge {
+    width: 36px;
+    height: 36px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    border: 1px solid var(--border);
+    background: #f0f9f3;
+}
+
+.face-badge.negative {
+    background: #fff5f5;
+}
+
+.one-line-review {
+    margin: 12px 0 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    color: #495057;
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.recent-review-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.recent-review-list li {
+    color: #495057;
+    font-size: 0.86rem;
+    line-height: 1.45;
+}
+
+.recent-review-list li::before {
+    content: "“";
     color: var(--accent);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 /* --- 우측 지도 섹션 --- */
@@ -190,30 +226,26 @@ nav {
     cursor: pointer;
 }
 
-.score-pin {
+.face-pin {
     width: 42px;
     height: 42px;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid white;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     transition: all 0.2s;
+    background: #2f9e44;
 }
 
-.score-pin span {
-    transform: rotate(45deg); /* 숫자는 똑바로 */
-    color: white;
-    font-weight: 800;
-    font-size: 14px;
+.face-pin span {
+    font-size: 22px;
+    line-height: 1;
 }
 
-/* 점수별 마커 색상 */
-.score-pin.high { background: var(--accent); }   /* 90+ */
-.score-pin.mid  { background: var(--accent2); }  /* 80~89 */
-.score-pin.low  { background: var(--warning); }  /* 79이하 */
+.face-pin.positive { background: #d3f9d8; }
+.face-pin.negative { background: #ffe3e3; }
 
 .marker-title {
     margin-top: 8px;
@@ -251,6 +283,141 @@ nav {
 .detail-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
 
 .big-score { font-size: 3.5rem; font-weight: 700; color: var(--accent); }
+.face-detail {
+    width: 84px;
+    height: 84px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #d3f9d8;
+    margin-bottom: 16px;
+}
+
+.face-detail.negative {
+    background: #ffe3e3;
+}
+
+.detail-one-line {
+    margin: 0 0 12px;
+    color: #343a40;
+    line-height: 1.6;
+    font-weight: 700;
+}
+
+.recent-review-panel {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.recent-review-panel strong {
+    display: block;
+    color: #343a40;
+    font-size: 0.9rem;
+}
+
+.detail-review-counts {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.detail-review-counts span {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.detail-open-message {
+    margin: 12px 0 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.review-composer {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface2);
+}
+
+.review-composer label {
+    display: block;
+    margin-bottom: 10px;
+    color: #343a40;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.review-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+.review-input-row input {
+    flex: 1;
+    min-width: 0;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--text);
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.review-input-row input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(49, 130, 246, 0.12);
+}
+
+.review-input-row button,
+.review-composer.locked button {
+    height: 42px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.review-composer.locked {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.review-composer.locked p,
+.review-guide {
+    margin: 16px 0 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .review-input-row,
+    .review-composer.locked {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
 
 /* 카드 내 정보 행 스타일 */
 .card-info-row {

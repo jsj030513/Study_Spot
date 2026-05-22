@@ -76,6 +76,12 @@ public class OwnerCafeManagementService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "등록된 카페 프로필이 없습니다."));
     }
 
+    public CafeProfileResponse findPublicProfile(String placeId) {
+        return cafeProfileRepository.findByPlaceId(placeId)
+                .map(CafeProfile::toResponse)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "등록된 카페 프로필이 없습니다."));
+    }
+
     @Transactional
     public CafeProfileResponse createProfile(AuthUser authUser, String placeId, CafeProfileRequest request) {
         assertCanManage(authUser, placeId);

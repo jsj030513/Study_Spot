@@ -106,6 +106,8 @@ function openModal() {
     
     if (modal && userData) {
         document.getElementById('editName').value = userData.name;
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editPasswordConfirm').value = '';
         modal.style.display = 'flex';
     }
 }
@@ -119,10 +121,23 @@ function closeModal() {
 // 정보 저장
 async function saveUserInfo() {
     const newName = document.getElementById('editName').value;
+    const newPassword = document.getElementById('editPassword').value;
+    const passwordConfirm = document.getElementById('editPasswordConfirm').value;
     
     if (!newName.trim()) {
         alert("이름을 입력해주세요.");
         return;
+    }
+
+    if (newPassword || passwordConfirm) {
+        if (newPassword.length < 8) {
+            alert("비밀번호는 8자 이상 입력해주세요.");
+            return;
+        }
+        if (newPassword !== passwordConfirm) {
+            alert("새 비밀번호가 일치하지 않습니다.");
+            return;
+        }
     }
 
     const token = localStorage.getItem('authToken');
@@ -139,7 +154,10 @@ async function saveUserInfo() {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name: newName.trim() })
+            body: JSON.stringify({
+                name: newName.trim(),
+                password: newPassword ? newPassword : null
+            })
         });
 
         if (!response.ok) {

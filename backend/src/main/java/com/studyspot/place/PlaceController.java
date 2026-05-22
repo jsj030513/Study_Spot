@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.studyspot.auth.AuthUser;
 import com.studyspot.auth.LoginUser;
 import com.studyspot.common.ApiException;
+import com.studyspot.owner.CafeProfileResponse;
 import com.studyspot.owner.CafeOpenStatusResponse;
 import com.studyspot.owner.OwnerCafeManagementService;
 
@@ -56,6 +57,14 @@ public class PlaceController {
             throw new ApiException(HttpStatus.BAD_REQUEST, "카페에만 오픈 여부가 제공됩니다.");
         }
         return ownerCafeManagementService.findOpenStatus(placeId);
+    }
+
+    @GetMapping("/{placeId}/profile")
+    public CafeProfileResponse findProfile(@PathVariable String placeId) {
+        if (!placeService.isCafe(placeId)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "카페에만 프로필이 제공됩니다.");
+        }
+        return ownerCafeManagementService.findPublicProfile(placeId);
     }
 
     @PostMapping

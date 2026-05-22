@@ -18,6 +18,57 @@ body {
     z-index: 10;
 }
 
+.admin-login-container {
+    max-width: 400px;
+}
+
+.admin-login-notice {
+    padding: 13px 14px;
+    margin-bottom: 22px;
+    border: 1px solid #d7e3f4;
+    border-radius: 12px;
+    background: #f3f7fc;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.account-type-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.account-type-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--muted);
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.account-type-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.account-type-card.active {
+    border-color: var(--accent);
+    background: #edf4ff;
+    color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(43, 90, 158, 0.08);
+}
+
 /* 헤더 & 로고 */
 .login-header {
     text-align: center;
@@ -58,7 +109,8 @@ body {
     text-align: left;
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
     width: 100%;
     padding: 14px 16px;
     border: 1px solid var(--border);
@@ -70,10 +122,23 @@ body {
     box-sizing: border-box; /* 패딩 포함 크기 계산 */
 }
 
-.input-group input:focus {
+.input-group input:focus,
+.input-group select:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(43, 90, 158, 0.1);
+}
+
+.owner-fields {
+    padding: 16px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface2);
+}
+
+.owner-fields .input-group:last-child {
+    margin-bottom: 0;
 }
 
 /* 중복확인 버튼 영역 수정 (이미지 속 이슈 해결) */
