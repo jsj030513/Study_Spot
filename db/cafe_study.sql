@@ -168,6 +168,19 @@ VALUES
 ('CON000000012', 'GS25 백석대점', 'convenience', 36.8413307, 127.1808794, '충남 천안시 동남구 문암4길 10-18 창이빌딩 1층'),
 ('CON000000013', 'GS25 백석대타운점', 'convenience', 36.8411190, 127.1800456, '충남 천안시 동남구 문암4길 7 1층');
 
+('STA000000001', '스타오피스', 'stationery', 36.8420351, 127.1817952, '충남 천안시 동남구 문암로 83');
+('STA000000002', '천안문화사', 'stationery', 36.8408046, 127.1804584, '충남 천안시 동남구 문암로 65');
+
+('PRT000000001', '백석생활관 프린터', 'print_shop', 36.8426359, 127.1851273, '충남 천안시 동남구 백석대학로 1-19 백석생활관');
+('PRT000000002', '본부동 3층 프린터', 'print_shop', 36.8392080, 127.1859161, '충남 천안시 동남구 백석대학로 1-11 3층');
+('PRT000000003', '본부동 6층 프린터', 'print_shop', 36.8392080, 127.1859161, '충남 천안시 동남구 백석대학로 1-11 6층');
+('PRT000000004', '지혜관 3층 프린터', 'print_shop', 36.8386523, 127.1842850, '충남 천안시 동남구 백석대학로 1-8 3층');
+('PRT000000005', '목양관 지하1층 프린터', 'print_shop', 36.8408505, 127.1835535, '충남 천안시 동남구 백석대학로 1-6 지하1층');
+('PRT000000006', '학생복지관 지하1층 프린터', 'print_shop', 36.8405633, 127.1824671, '충남 천안시 동남구 백석대학로 1-9 지하1층');
+
+
+
+
 
 /*!40000 ALTER TABLE `place_master` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -185,7 +198,7 @@ CREATE TABLE `user_master` (
   `USER_NM` varchar(30) NOT NULL,
   `ROLE_TY` char(1) DEFAULT 'U',
   `REG_DT` date DEFAULT (curdate()),
-  PRIMARY KEY (`USER_ID`),
+  PRIMARY KEY (`USER_ID`)
   CONSTRAINT chk_user_role CHECK (ROLE_TY IN ('U', 'O', 'A'))  -- 사용자 권한 제약조건
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -350,4 +363,5 @@ CREATE TABLE `cafe_photo` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-05-17 19:59:29
+
 
