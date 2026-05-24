@@ -147,6 +147,28 @@ SELECT
   CONCAT(ci.`CAFE_NM`, '의 공부하기 좋은 카페 정보입니다.')
 FROM `cafe_info` ci
 LEFT JOIN `cafe_facility` cf ON ci.`CAFE_ID` = cf.`CAFE_ID`;
+INSERT INTO `place_master` 
+(`PLACE_ID`, `PLACE_NM`, `PLACE_TY`, `LAT`, `LNT`, `ADDR`)
+VALUES 
+('LIB000000001', '백석대학교 학술정보관', 'library', 36.8377770, 127.1839946, '충남 천안시 동남구 백석대학로 1-12'),
+('LIB000000002', '백석대학교 본부동 도서관', 'library', 36.8391882, 127.1858767, '충남 천안시 동남구 백석대학로 1-11'),
+('LIB000000003', '백석문화대학 도서관', 'library', 36.8382586, 127.1829669, '충남 천안시 동남구 백석대학로 1-2'),
+
+('CON000000001', 'CU 천안백석대정문점', 'convenience', 36.8414198, 127.1817066, '충남 천안시 동남구 문암로 78 1층'),
+('CON000000002', '세븐일레븐 천안백석학생복지동점', 'convenience', 36.8406689, 127.1825567, '충남 천안시 동남구 백석대학로 1-9 2층 211호'),
+('CON000000003', 'CU 천안백석대진리관점', 'convenience', 36.8401131, 127.1845193, '충남 천안시 동남구 백석대학로 1-1 지하1층 101호'),
+('CON000000004', '이마트24 은혜관점', 'convenience', 36.8386476, 127.1819442, '충남 천안시 동남구 백석대학로 1-7 은혜관 101호'),
+('CON000000005', 'GS25 자유관점', 'convenience', 36.8384998, 127.1832242, '충남 천안시 동남구 백석대학로 1-2'),
+('CON000000006', 'CU 천안백석대지혜관점', 'convenience', 36.8385655, 127.1843555, '충남 천안시 동남구 백석대학로 1-1 지혜관동 3층 309호'),
+('CON000000007', 'CU 천안백석대본부동점', 'convenience', 36.8391803, 127.1858902, '충남 천안시 동남구 백석대학로 1-11 백석대학교 본부동'),
+('CON000000008', 'CU 천안백석대조형관점', 'convenience', 36.8409088, 127.1884576, '충남 천안시 동남구 백석대학로 1-18 1층 104,105,107호'),
+('CON000000009', '세븐일레븐 천안백석대학로점', 'convenience', 36.8420231, 127.1868946, '충남 천안시 동남구 문암5길 25 1층'),
+('CON000000010', 'GS25 백석생활관점', 'convenience', 36.8425553, 127.1851498, '충남 천안시 동남구 백석대학로 1-19 백석생활관 2층 202호'),
+('CON000000011', '세븐일레븐 백석문암점', 'convenience', 36.8421389, 127.1825057, '충남 천안시 동남구 문암로 90 1층'),
+('CON000000012', 'GS25 백석대점', 'convenience', 36.8413307, 127.1808794, '충남 천안시 동남구 문암4길 10-18 창이빌딩 1층'),
+('CON000000013', 'GS25 백석대타운점', 'convenience', 36.8411190, 127.1800456, '충남 천안시 동남구 문암4길 7 1층');
+
+
 /*!40000 ALTER TABLE `place_master` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -164,6 +186,7 @@ CREATE TABLE `user_master` (
   `ROLE_TY` char(1) DEFAULT 'U',
   `REG_DT` date DEFAULT (curdate()),
   PRIMARY KEY (`USER_ID`)
+  CONSTRAINT chk_user_role CHECK (ROLE_TY IN ('U', 'O', 'A'))  -- 사용자 권한 제약조건
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -327,3 +350,5 @@ CREATE TABLE `cafe_photo` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-05-17 19:59:29
+
+
