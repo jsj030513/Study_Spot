@@ -24,11 +24,8 @@ function initMyPage() {
     }
 
     const nameEl = document.getElementById('userName');
-    const deptEl = document.getElementById('userDept');
 
     if (nameEl) nameEl.innerText = `${userData.name}님`;
-    // 학과 정보가 있다면 표시 (데이터 구조에 따라 조절)
-    if (deptEl && userData.dept) deptEl.innerText = userData.dept;
 
     renderFavorites();
 }

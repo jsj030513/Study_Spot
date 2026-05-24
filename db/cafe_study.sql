@@ -185,7 +185,7 @@ CREATE TABLE `user_master` (
   `USER_NM` varchar(30) NOT NULL,
   `ROLE_TY` char(1) DEFAULT 'U',
   `REG_DT` date DEFAULT (curdate()),
-  PRIMARY KEY (`USER_ID`)
+  PRIMARY KEY (`USER_ID`),
   CONSTRAINT chk_user_role CHECK (ROLE_TY IN ('U', 'O', 'A'))  -- 사용자 권한 제약조건
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -350,5 +350,4 @@ CREATE TABLE `cafe_photo` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-05-17 19:59:29
-
 
