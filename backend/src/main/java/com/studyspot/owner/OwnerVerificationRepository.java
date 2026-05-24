@@ -16,6 +16,7 @@ public class OwnerVerificationRepository {
             rs.getString("VERIFICATION_ID"),
             rs.getString("USER_ID"),
             rs.getString("PLACE_ID"),
+            rs.getString("REQUESTED_PLACE_NM"),
             rs.getString("BUSINESS_NO"),
             rs.getString("DOCUMENT_URL"),
             OwnerVerificationStatus.from(rs.getString("STATUS_TY")),
@@ -32,7 +33,7 @@ public class OwnerVerificationRepository {
         if (status == null) {
             return jdbcTemplate.query(
                     """
-                    SELECT VERIFICATION_ID, USER_ID, PLACE_ID, BUSINESS_NO, DOCUMENT_URL,
+                    SELECT VERIFICATION_ID, USER_ID, PLACE_ID, REQUESTED_PLACE_NM, BUSINESS_NO, DOCUMENT_URL,
                            STATUS_TY, REJECT_REASON, REQ_DT, REVIEW_DT
                     FROM owner_verification
                     ORDER BY REQ_DT DESC, VERIFICATION_ID DESC
@@ -43,7 +44,7 @@ public class OwnerVerificationRepository {
 
         return jdbcTemplate.query(
                 """
-                SELECT VERIFICATION_ID, USER_ID, PLACE_ID, BUSINESS_NO, DOCUMENT_URL,
+                SELECT VERIFICATION_ID, USER_ID, PLACE_ID, REQUESTED_PLACE_NM, BUSINESS_NO, DOCUMENT_URL,
                        STATUS_TY, REJECT_REASON, REQ_DT, REVIEW_DT
                 FROM owner_verification
                 WHERE STATUS_TY = ?
@@ -57,7 +58,7 @@ public class OwnerVerificationRepository {
     public List<OwnerVerification> findByUserId(String userId) {
         return jdbcTemplate.query(
                 """
-                SELECT VERIFICATION_ID, USER_ID, PLACE_ID, BUSINESS_NO, DOCUMENT_URL,
+                SELECT VERIFICATION_ID, USER_ID, PLACE_ID, REQUESTED_PLACE_NM, BUSINESS_NO, DOCUMENT_URL,
                        STATUS_TY, REJECT_REASON, REQ_DT, REVIEW_DT
                 FROM owner_verification
                 WHERE USER_ID = ?
@@ -71,7 +72,7 @@ public class OwnerVerificationRepository {
     public Optional<OwnerVerification> findById(String verificationId) {
         List<OwnerVerification> verifications = jdbcTemplate.query(
                 """
-                SELECT VERIFICATION_ID, USER_ID, PLACE_ID, BUSINESS_NO, DOCUMENT_URL,
+                SELECT VERIFICATION_ID, USER_ID, PLACE_ID, REQUESTED_PLACE_NM, BUSINESS_NO, DOCUMENT_URL,
                        STATUS_TY, REJECT_REASON, REQ_DT, REVIEW_DT
                 FROM owner_verification
                 WHERE VERIFICATION_ID = ?
@@ -96,27 +97,51 @@ public class OwnerVerificationRepository {
         return count != null && count > 0;
     }
 
+    public boolean hasPendingRequestedPlace(String userId, String requestedPlaceName) {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM owner_verification
+                WHERE USER_ID = ? AND REQUESTED_PLACE_NM = ? AND STATUS_TY = 'PENDING'
+                """,
+                Integer.class,
+                userId,
+                requestedPlaceName
+        );
+        return count != null && count > 0;
+    }
+
     public String nextVerificationId() {
         String maxId = jdbcTemplate.queryForObject("SELECT MAX(VERIFICATION_ID) FROM owner_verification", String.class);
-        if (maxId == null || !maxId.matches("^OV\\d{10}$")) {
+        if (maxId == null || !maxId.matches("^OV\\d+$")) {
             return "OV0000000001";
         }
-        int nextNumber = Integer.parseInt(maxId.substring(2)) + 1;
+        long nextNumber = Long.parseLong(maxId.substring(2)) + 1;
         return "OV" + String.format("%010d", nextNumber);
     }
 
-    public void insert(String verificationId, String userId, OwnerVerificationRequest request) {
+    public void insert(String verificationId, String userId, String placeId, String requestedPlaceName,
+            OwnerVerificationRequest request) {
         jdbcTemplate.update(
                 """
                 INSERT INTO owner_verification
-                (VERIFICATION_ID, USER_ID, PLACE_ID, BUSINESS_NO, DOCUMENT_URL, STATUS_TY, REQ_DT)
-                VALUES (?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP)
+                (VERIFICATION_ID, USER_ID, PLACE_ID, REQUESTED_PLACE_NM, BUSINESS_NO, DOCUMENT_URL, STATUS_TY, REQ_DT)
+                VALUES (?, ?, ?, ?, ?, ?, 'PENDING', CURRENT_TIMESTAMP)
                 """,
                 verificationId,
                 userId,
-                request.placeId(),
+                placeId,
+                requestedPlaceName,
                 request.businessNumber(),
                 request.documentUrl()
+        );
+    }
+
+    public void updatePlaceId(String verificationId, String placeId) {
+        jdbcTemplate.update(
+                "UPDATE owner_verification SET PLACE_ID = ? WHERE VERIFICATION_ID = ?",
+                placeId,
+                verificationId
         );
     }
 

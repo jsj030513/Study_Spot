@@ -1,5 +1,6 @@
 package com.studyspot.place;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -137,11 +138,14 @@ public class PlaceRepository {
     }
 
     public String nextPlaceId() {
-        String maxId = jdbcTemplate.queryForObject("SELECT MAX(PLACE_ID) FROM place_master", String.class);
+        String maxId = jdbcTemplate.queryForObject(
+                "SELECT MAX(PLACE_ID) FROM place_master WHERE PLACE_ID REGEXP '^PLACE[0-9]{8}$'",
+                String.class
+        );
         if (maxId == null || !maxId.matches("^PLACE\\d{8}$")) {
             return "PLACE00000001";
         }
-        int nextNumber = Integer.parseInt(maxId.substring(5)) + 1;
+        long nextNumber = Long.parseLong(maxId.substring(5)) + 1;
         return "PLACE" + String.format("%08d", nextNumber);
     }
 
@@ -164,6 +168,21 @@ public class PlaceRepository {
                 request.noiseLevel(),
                 request.seatType(),
                 request.description()
+        );
+    }
+
+    public void insertPendingCafe(String placeId, String name) {
+        jdbcTemplate.update(
+                """
+                INSERT INTO place_master
+                (PLACE_ID, PLACE_NM, PLACE_TY, LAT, LNT, ADDR, WIFI_ST, OTL_ST, NOI_LVL, SEAT_TY, DESC_TXT)
+                VALUES (?, ?, 'cafe', ?, ?, NULL, '미등록', '미등록', '미등록', '미등록', ?)
+                """,
+                placeId,
+                name,
+                BigDecimal.valueOf(36.8360),
+                BigDecimal.valueOf(127.1750),
+                "사장님 인증 승인으로 등록된 신규 카페입니다. 위치와 시설 정보를 수정해주세요."
         );
     }
 

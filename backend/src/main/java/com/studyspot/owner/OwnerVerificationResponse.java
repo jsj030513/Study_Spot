@@ -6,6 +6,7 @@ public record OwnerVerificationResponse(
         String verificationId,
         String userId,
         String placeId,
+        String requestedPlaceName,
         String businessNumber,
         String documentUrl,
         String status,

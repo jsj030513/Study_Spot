@@ -30,6 +30,12 @@ public enum PlaceType {
     }
 
     public static PlaceType from(String code) {
+        if ("convenience".equalsIgnoreCase(code)) {
+            return STORE;
+        }
+        if ("print_shop".equalsIgnoreCase(code)) {
+            return PRINT;
+        }
         return Arrays.stream(values())
                 .filter(type -> type.code.equalsIgnoreCase(code))
                 .findFirst()

@@ -267,12 +267,16 @@ async function loadOwnerVerifications(status = '') {
 function renderOwnerVerificationTable(verifications) {
     const rows = verifications.map(item => {
         const cafe = places.find(place => place.placeId === item.placeId);
+        const requestedCafeName = item.requestedPlaceName || '';
+        const cafeName = cafe?.name || requestedCafeName || item.placeId || '신규 카페';
+        const cafeDescription = cafe?.address
+            || (requestedCafeName ? '신규 카페 신청입니다. 승인 시 장소가 자동 등록됩니다.' : '카페 정보를 확인할 수 없습니다.');
         return `
             <tr>
                 <td><strong>${escapeHtml(item.userId)}</strong><div class="muted">${escapeHtml(item.requestedAt || '')}</div></td>
                 <td>
-                    <strong>${escapeHtml(cafe?.name || item.placeId)}</strong>
-                    <div class="muted">${escapeHtml(cafe?.address || '카페 정보를 확인할 수 없습니다.')}</div>
+                    <strong>${escapeHtml(cafeName)}</strong>
+                    <div class="muted">${escapeHtml(cafeDescription)}</div>
                 </td>
                 <td>${escapeHtml(item.businessNumber)}</td>
                 <td>

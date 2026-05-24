@@ -273,9 +273,10 @@ async function saveBasicInfo(event) {
     event.preventDefault();
     if (!selectedCafe) return;
 
+    const address = document.getElementById('addressInput').value.trim();
     const body = {
         name: document.getElementById('cafeNameInput').value.trim(),
-        address: document.getElementById('addressInput').value.trim(),
+        address,
         telNo: document.getElementById('telNoInput').value.trim(),
         wifiStatus: document.getElementById('wifiStatusInput').value.trim(),
         outletStatus: document.getElementById('outletStatusInput').value.trim(),
@@ -285,6 +286,12 @@ async function saveBasicInfo(event) {
     };
 
     try {
+        if (address && address !== (selectedCafe.address || '')) {
+            const coordinates = await geocodeAddress(address);
+            body.latitude = coordinates.latitude;
+            body.longitude = coordinates.longitude;
+        }
+
         const updatedCafe = await requestJson(`/api/owner/cafes/${selectedCafe.placeId}`, {
             method: 'PATCH',
             body: JSON.stringify(body)
@@ -298,6 +305,28 @@ async function saveBasicInfo(event) {
     } catch (error) {
         alert(error.message);
     }
+}
+
+function geocodeAddress(address) {
+    return new Promise((resolve, reject) => {
+        if (window.kakaoMapSdkFailed || !window.kakao?.maps?.services) {
+            reject(new Error('주소 좌표 변환을 사용할 수 없습니다. 카카오맵 SDK 로딩을 확인해주세요.'));
+            return;
+        }
+
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.addressSearch(address, (result, status) => {
+            if (status !== kakao.maps.services.Status.OK || !result.length) {
+                reject(new Error('주소를 찾을 수 없습니다. 도로명/지번 주소를 정확히 입력해주세요.'));
+                return;
+            }
+
+            resolve({
+                latitude: Number(result[0].y),
+                longitude: Number(result[0].x)
+            });
+        });
+    });
 }
 
 async function saveOpenStatus(event) {

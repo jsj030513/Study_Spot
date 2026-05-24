@@ -103,6 +103,24 @@ async function requestOwnerVerification() {
     return response.json();
 }
 
+async function rollbackCreatedSignup() {
+    const token = localStorage.getItem('authToken');
+    if (!token) return false;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return response.ok;
+    } catch (error) {
+        return false;
+    } finally {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+    }
+}
+
 function resolveOwnerPlaceId() {
     const value = document.getElementById('ownerPlaceId').value.trim();
     const matchedCafe = cafeOptions.find(cafe => cafe.placeId === value || cafe.name === value);
@@ -164,7 +182,16 @@ document.getElementById('joinForm')?.addEventListener('submit', async function(e
 
         if (accountType === 'owner') {
             await loginAfterSignup(userId, pw);
-            await requestOwnerVerification();
+            try {
+                await requestOwnerVerification();
+            } catch (error) {
+                const rolledBack = await rollbackCreatedSignup();
+                const retryMessage = rolledBack
+                    ? '입력한 정보를 확인한 뒤 같은 아이디로 다시 가입해주세요.'
+                    : '이미 생성된 계정이 남아 있을 수 있습니다. 관리자에게 계정 삭제를 요청한 뒤 다시 시도해주세요.';
+                alert(`${error.message || '사업자 인증 요청에 실패했습니다.'}\n${retryMessage}`);
+                return;
+            }
             alert('사업자 회원가입과 인증 요청이 완료되었습니다. 관리자 승인 후 사업자 로그인을 이용할 수 있습니다.');
             location.href = routeUrl('/login');
             return;

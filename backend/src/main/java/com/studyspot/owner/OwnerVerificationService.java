@@ -41,13 +41,19 @@ public class OwnerVerificationService {
 
     @Transactional
     public OwnerVerificationResponse requestVerification(String userId, OwnerVerificationRequest request) {
-        assertCafe(request.placeId());
-        if (ownerVerificationRepository.hasPending(userId, request.placeId())) {
+        VerificationPlace verificationPlace = resolveVerificationPlace(request.placeId());
+        if (verificationPlace.existingPlaceId() != null
+                && ownerVerificationRepository.hasPending(userId, verificationPlace.existingPlaceId())) {
+            throw new ApiException(HttpStatus.CONFLICT, "이미 처리 대기 중인 사장 인증 요청이 있습니다.");
+        }
+        if (verificationPlace.requestedPlaceName() != null
+                && ownerVerificationRepository.hasPendingRequestedPlace(userId, verificationPlace.requestedPlaceName())) {
             throw new ApiException(HttpStatus.CONFLICT, "이미 처리 대기 중인 사장 인증 요청이 있습니다.");
         }
 
         String verificationId = ownerVerificationRepository.nextVerificationId();
-        ownerVerificationRepository.insert(verificationId, userId, request);
+        ownerVerificationRepository.insert(verificationId, userId, verificationPlace.existingPlaceId(),
+                verificationPlace.requestedPlaceName(), request);
         return findVerification(verificationId).toResponse();
     }
 
@@ -65,8 +71,14 @@ public class OwnerVerificationService {
                 status == OwnerVerificationStatus.REJECTED ? request.rejectReason() : null);
 
         if (status == OwnerVerificationStatus.APPROVED) {
-            placeRepository.addOwnerIfAbsent(verification.userId(), verification.placeId());
+            String placeId = verification.placeId();
+            if (placeId == null || placeId.isBlank()) {
+                placeId = placeRepository.nextPlaceId();
+                placeRepository.insertPendingCafe(placeId, verification.requestedPlaceName());
+                ownerVerificationRepository.updatePlaceId(verificationId, placeId);
+            }
             userService.grantOwnerRole(verification.userId());
+            placeRepository.addOwnerIfAbsent(verification.userId(), placeId);
         }
 
         return findVerification(verificationId).toResponse();
@@ -77,9 +89,23 @@ public class OwnerVerificationService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "사장 인증 요청을 찾을 수 없습니다."));
     }
 
-    private void assertCafe(String placeId) {
-        if (!placeRepository.isCafe(placeId)) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "카페에 대해서만 사장 인증을 요청할 수 있습니다.");
+    private VerificationPlace resolveVerificationPlace(String input) {
+        String value = input == null ? "" : input.trim();
+        if (value.isBlank()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "운영 카페를 입력해주세요.");
         }
+
+        if (placeRepository.isCafe(value)) {
+            return new VerificationPlace(value, null);
+        }
+
+        if (value.length() > 80) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "신규 카페명은 80자 이하로 입력해주세요.");
+        }
+
+        return new VerificationPlace(null, value);
+    }
+
+    private record VerificationPlace(String existingPlaceId, String requestedPlaceName) {
     }
 }
