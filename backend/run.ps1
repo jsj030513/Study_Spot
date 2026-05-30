@@ -17,7 +17,7 @@ if (Test-Path $localMaven) {
     $maven = $localMaven
 }
 
-& $maven package -DskipTests
+& $maven clean package -DskipTests
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }

@@ -22,6 +22,7 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         ensureOwnerVerificationSupportsNewCafeRequests();
         normalizePlaceTypes();
+        seedCafePlacesFromCafeInfo();
         seedDefaultNonCafePlaces();
     }
 
@@ -142,6 +143,52 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
                     "충남 천안시 동남구 백석대학로 1-9 지하1층");
         } catch (Exception exception) {
             log.warn("default non-cafe place seeding was skipped: {}", exception.getMessage());
+        }
+    }
+
+    private void seedCafePlacesFromCafeInfo() {
+        if (!tableExists("place_master") || !tableExists("cafe_info")) {
+            return;
+        }
+
+        try {
+            jdbcTemplate.update("""
+                    INSERT INTO place_master
+                    (PLACE_ID, PLACE_NM, PLACE_TY, LAT, LNT, ADDR, TEL_NO, WIFI_ST, OTL_ST, NOI_LVL, SEAT_TY, DESC_TXT)
+                    SELECT
+                        i.CAFE_ID,
+                        i.CAFE_NM,
+                        'cafe',
+                        i.LAT,
+                        i.LNT,
+                        i.ADDR,
+                        i.TEL_NO,
+                        COALESCE(f.WIFI_ST, '보통'),
+                        CASE
+                            WHEN f.OTL_FLG = 'Y' THEN '있음'
+                            WHEN f.OTL_FLG = 'N' THEN '없음'
+                            ELSE COALESCE(f.OTL_FLG, '미등록')
+                        END,
+                        COALESCE(f.NOI_LVL, '보통'),
+                        COALESCE(f.SEAT_TY, '일반 좌석'),
+                        CONCAT(i.CAFE_NM, ' 카페 정보입니다.')
+                    FROM cafe_info i
+                    LEFT JOIN cafe_facility f ON i.CAFE_ID = f.CAFE_ID
+                    ON DUPLICATE KEY UPDATE
+                        PLACE_NM = VALUES(PLACE_NM),
+                        PLACE_TY = 'cafe',
+                        LAT = VALUES(LAT),
+                        LNT = VALUES(LNT),
+                        ADDR = VALUES(ADDR),
+                        TEL_NO = VALUES(TEL_NO),
+                        WIFI_ST = VALUES(WIFI_ST),
+                        OTL_ST = VALUES(OTL_ST),
+                        NOI_LVL = VALUES(NOI_LVL),
+                        SEAT_TY = VALUES(SEAT_TY),
+                        DESC_TXT = VALUES(DESC_TXT)
+                    """);
+        } catch (Exception exception) {
+            log.warn("cafe place seeding was skipped: {}", exception.getMessage());
         }
     }
 

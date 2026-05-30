@@ -367,5 +367,3 @@ CREATE TABLE `cafe_photo` (
 ALTER TABLE owner_verification
   MODIFY PLACE_ID varchar(20) DEFAULT NULL;
 
-ALTER TABLE owner_verification
-  ADD COLUMN REQUESTED_PLACE_NM varchar(80) DEFAULT NULL AFTER PLACE_ID;
