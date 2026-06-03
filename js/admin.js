@@ -1,5 +1,5 @@
-const BACKEND_URL = `${location.protocol}//${location.hostname}:8080`;
-const API_BASE_URL = location.port === '5500' ? BACKEND_URL : '';
+const BACKEND_URL = `${location.protocol}//${location.hostname || 'localhost'}:8080`;
+const API_BASE_URL = location.port === '5500' || location.protocol === 'file:' ? BACKEND_URL : '';
 
 let places = [];
 let users = [];
@@ -7,7 +7,7 @@ let ownerStatusFilter = '';
 let currentFilter = '전체';
 
 function routeUrl(path) {
-    return location.port === '5500' ? `${BACKEND_URL}${path}` : path;
+    return location.port === '5500' || location.protocol === 'file:' ? `${BACKEND_URL}${path}` : path;
 }
 
 function getStoredUser() {
@@ -88,8 +88,7 @@ function switchMode(mode) {
     });
 
     document.querySelectorAll('.menu-btn').forEach(button => button.classList.remove('active'));
-    const activeButton = document.getElementById(`btn${capitalize(mode)}Mode`);
-    activeButton?.classList.add('active');
+    document.getElementById(`btn${capitalize(mode)}Mode`)?.classList.add('active');
 
     if (mode === 'review') loadReviews();
     if (mode === 'owner') loadOwnerVerifications(ownerStatusFilter);
@@ -118,7 +117,7 @@ async function fetchPublicJson(path) {
 function updateDashboard() {
     const counts = { '전체': places.length, '카페': 0, '도서관': 0, '편의점': 0, '문구점': 0, '프린트': 0 };
     places.forEach(place => {
-        const label = normalizeTypeName(place.typeName);
+        const label = normalizeTypeName(place.type, place.typeName);
         if (counts[label] !== undefined) counts[label] += 1;
     });
 
@@ -130,9 +129,13 @@ function updateDashboard() {
     setText('countPrint', counts['프린트']);
 }
 
-function normalizeTypeName(typeName) {
-    if (typeName === '복사/인쇄') return '프린트';
-    if (typeName === '문구/잡화' || typeName === '교내문구') return '문구점';
+function normalizeTypeName(type, typeName) {
+    const normalizedType = String(type || '').toLowerCase();
+    if (normalizedType === 'cafe') return '카페';
+    if (normalizedType === 'library') return '도서관';
+    if (normalizedType === 'store' || normalizedType === 'convenience') return '편의점';
+    if (normalizedType === 'stationery') return '문구점';
+    if (normalizedType === 'print' || normalizedType === 'print_shop') return '프린트';
     return typeName || '기타';
 }
 
@@ -153,13 +156,13 @@ function filterCategory(category) {
 function renderSpotTable() {
     const filtered = currentFilter === '전체'
         ? places
-        : places.filter(place => normalizeTypeName(place.typeName) === currentFilter);
+        : places.filter(place => normalizeTypeName(place.type, place.typeName) === currentFilter);
 
     const rows = filtered.map(place => `
         <tr>
             <td><strong>${escapeHtml(place.name)}</strong><div class="muted">${escapeHtml(place.address || '')}</div></td>
-            <td>${escapeHtml(place.typeName)}</td>
-            <td>${place.recommendScore}점</td>
+            <td>${escapeHtml(normalizeTypeName(place.type, place.typeName))}</td>
+            <td>${escapeHtml(place.recommendScore ?? 0)}점</td>
             <td><span class="status-badge status-user">${escapeHtml(place.placeId)}</span></td>
         </tr>
     `).join('');
@@ -175,7 +178,7 @@ async function loadUsers() {
         users = await requestJson(`/api/admin/users${query}`);
         renderUserTable();
     } catch (error) {
-        renderEmpty('userTableBody', error.message, 6);
+        renderEmpty('userTableBody', error.message, 5);
     }
 }
 
@@ -184,7 +187,6 @@ function renderUserTable() {
         <tr>
             <td>${escapeHtml(user.userId)}</td>
             <td><strong>${escapeHtml(user.name)}</strong></td>
-            <td>-</td>
             <td>${escapeHtml(user.registeredDate || '-')}</td>
             <td>${roleBadge(user.role)}</td>
             <td>
@@ -193,11 +195,11 @@ function renderUserTable() {
         </tr>
     `).join('');
 
-    document.getElementById('userTableBody').innerHTML = rows || emptyRow(6, '회원이 없습니다.');
+    document.getElementById('userTableBody').innerHTML = rows || emptyRow(5, '회원이 없습니다.');
 }
 
 function roleBadge(role) {
-    const label = role === 'A' ? '관리자' : role === 'O' ? '사장님' : '이용자';
+    const label = role === 'A' ? '관리자' : role === 'O' ? '사업자' : '이용자';
     const className = role === 'A' ? 'status-admin' : role === 'O' ? 'status-owner' : 'status-user';
     return `<span class="status-badge ${className}">${label}</span>`;
 }
@@ -215,7 +217,7 @@ async function deleteUser(userId) {
 
 async function loadReviews() {
     const tbody = document.getElementById('reviewTableBody');
-    tbody.innerHTML = emptyRow(6, '한줄평을 불러오는 중입니다.');
+    tbody.innerHTML = emptyRow(6, '리뷰를 불러오는 중입니다.');
 
     try {
         if (!places.length) await loadPlaces();
@@ -237,12 +239,12 @@ function renderReviewTable(reviews) {
             <td>${escapeHtml(review.userId)}</td>
             <td>${escapeHtml(review.content)}</td>
             <td>${sentimentBadge(review.sentiment)}</td>
-            <td>${review.clean ? '<span class="status-badge status-clean">통과</span>' : '<span class="status-badge status-blocked">마스킹됨</span>'}</td>
+            <td>${review.clean ? '<span class="status-badge status-clean">통과</span>' : '<span class="status-badge status-blocked">차단</span>'}</td>
             <td>${escapeHtml(review.registeredDate || '-')}</td>
         </tr>
     `).join('');
 
-    document.getElementById('reviewTableBody').innerHTML = rows || emptyRow(6, '등록된 한줄평이 없습니다.');
+    document.getElementById('reviewTableBody').innerHTML = rows || emptyRow(6, '등록된 리뷰가 없습니다.');
 }
 
 function sentimentBadge(sentiment) {
@@ -270,18 +272,18 @@ function renderOwnerVerificationTable(verifications) {
         const requestedCafeName = item.requestedPlaceName || '';
         const cafeName = cafe?.name || requestedCafeName || item.placeId || '신규 카페';
         const cafeDescription = cafe?.address
-            || (requestedCafeName ? '신규 카페 신청입니다. 승인 시 장소가 자동 등록됩니다.' : '카페 정보를 확인할 수 없습니다.');
+            || (requestedCafeName ? '신규 카페 요청입니다. 승인 시 장소가 자동 등록됩니다.' : '카페 정보를 확인할 수 없습니다.');
         return `
             <tr>
-                <td><strong>${escapeHtml(item.userId)}</strong><div class="muted">${escapeHtml(item.requestedAt || '')}</div></td>
+                <td><strong>${escapeHtml(item.userId)}</strong><div class="muted">${escapeHtml(formatDateTime(item.requestedAt))}</div></td>
                 <td>
                     <strong>${escapeHtml(cafeName)}</strong>
                     <div class="muted">${escapeHtml(cafeDescription)}</div>
                 </td>
                 <td>${escapeHtml(item.businessNumber)}</td>
                 <td>
-                    <a class="download-link" href="${escapeAttribute(item.documentUrl)}" download target="_blank" rel="noopener">다운로드</a>
-                    <div class="muted">서류의 상호와 신청 카페명을 대조하세요.</div>
+                    <a class="download-link" href="${escapeAttribute(item.documentUrl)}" target="_blank" rel="noopener">열기</a>
+                    <div class="muted">시연용 증빙 URL입니다.</div>
                 </td>
                 <td>${verificationBadge(item.status)}</td>
                 <td>${verificationActions(item)}</td>
@@ -289,7 +291,7 @@ function renderOwnerVerificationTable(verifications) {
         `;
     }).join('');
 
-    document.getElementById('ownerVerificationTableBody').innerHTML = rows || emptyRow(6, '사장님 신청이 없습니다.');
+    document.getElementById('ownerVerificationTableBody').innerHTML = rows || emptyRow(6, '사업자 요청이 없습니다.');
 }
 
 function verificationBadge(status) {
@@ -324,6 +326,7 @@ async function reviewOwnerVerification(verificationId, status) {
             body: JSON.stringify({ status, rejectReason })
         });
         await loadOwnerVerifications(ownerStatusFilter);
+        await loadUsers();
     } catch (error) {
         alert(error.message);
     }
@@ -346,6 +349,11 @@ function renderEmpty(tbodyId, message, colSpan = 4) {
 
 function emptyRow(colSpan, message) {
     return `<tr><td colspan="${colSpan}" class="empty-cell">${escapeHtml(message)}</td></tr>`;
+}
+
+function formatDateTime(value) {
+    if (!value) return '-';
+    return String(value).replace('T', ' ').slice(0, 16);
 }
 
 function escapeHtml(value) {

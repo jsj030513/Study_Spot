@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공부명당 | 통합 관리 센터</title>
-    <link rel="stylesheet" href="../css/admin.css?v=20260524-owner-new-cafe">
+    <title>공부명당 - 통합 관리자</title>
+    <link rel="stylesheet" href="../css/admin.css?v=20260603-admin">
 </head>
 <body>
     <nav class="admin-nav">
         <div class="nav-left">
-            <div class="logo">📍 공부명당 Admin</div>
+            <div class="logo">공부명당 Admin</div>
             <div class="nav-menu">
                 <button class="menu-btn active" id="btnSpotMode" onclick="switchMode('spot')">장소 관리</button>
                 <button class="menu-btn" id="btnUserMode" onclick="switchMode('user')">회원 관리</button>
-                <button class="menu-btn" id="btnReviewMode" onclick="switchMode('review')">한줄평 관리</button>
-                <button class="menu-btn" id="btnOwnerMode" onclick="switchMode('owner')">사장님 신청</button>
+                <button class="menu-btn" id="btnReviewMode" onclick="switchMode('review')">리뷰 관리</button>
+                <button class="menu-btn" id="btnOwnerMode" onclick="switchMode('owner')">사업자 요청</button>
             </div>
         </div>
         <div class="user-info">
-            <span id="adminName">불러오는 중...</span>님 (Master)
+            <span id="adminName">불러오는 중...</span>님
             <button class="btn-logout" onclick="handleLogout()">로그아웃</button>
         </div>
     </nav>
@@ -27,27 +27,27 @@
         <div id="spotSection">
             <section class="category-dashboard">
                 <div class="category-card active" onclick="filterCategory('전체')">
-                    <div class="card-icon">🏠</div>
+                    <div class="card-icon">ALL</div>
                     <div class="card-info"><h4>전체</h4><p><span id="countAll">0</span>개</p></div>
                 </div>
                 <div class="category-card" onclick="filterCategory('카페')">
-                    <div class="card-icon">☕</div>
+                    <div class="card-icon">CAFE</div>
                     <div class="card-info"><h4>카페</h4><p><span id="countCafe">0</span>개</p></div>
                 </div>
                 <div class="category-card" onclick="filterCategory('도서관')">
-                    <div class="card-icon">📚</div>
+                    <div class="card-icon">LIB</div>
                     <div class="card-info"><h4>도서관</h4><p><span id="countLibrary">0</span>개</p></div>
                 </div>
                 <div class="category-card" onclick="filterCategory('편의점')">
-                    <div class="card-icon">🏪</div>
+                    <div class="card-icon">STORE</div>
                     <div class="card-info"><h4>편의점</h4><p><span id="countStore">0</span>개</p></div>
                 </div>
                 <div class="category-card" onclick="filterCategory('문구점')">
-                    <div class="card-icon">✏️</div>
+                    <div class="card-icon">STAT</div>
                     <div class="card-info"><h4>문구점</h4><p><span id="countStationery">0</span>개</p></div>
                 </div>
                 <div class="category-card" onclick="filterCategory('프린트')">
-                    <div class="card-icon">🖨️</div>
+                    <div class="card-icon">PRINT</div>
                     <div class="card-info"><h4>프린트</h4><p><span id="countPrint">0</span>개</p></div>
                 </div>
             </section>
@@ -59,7 +59,7 @@
                 </div>
                 <table class="data-table">
                     <thead>
-                        <tr><th>장소명</th><th>카테고리</th><th>평점</th><th>작업</th></tr>
+                        <tr><th>장소명</th><th>카테고리</th><th>추천 점수</th><th>장소 ID</th></tr>
                     </thead>
                     <tbody id="spotTableBody"></tbody>
                 </table>
@@ -79,10 +79,9 @@
                         <tr>
                             <th>사용자 ID</th>
                             <th>이름</th>
-                            <th>이메일</th>
                             <th>가입일</th>
                             <th>권한</th>
-                            <th>상태 제어</th>
+                            <th>작업</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody"></tbody>
@@ -93,7 +92,7 @@
         <div id="reviewSection" style="display: none;">
             <section class="management-section">
                 <div class="section-header">
-                    <h2>한줄평 클린봇 관리</h2>
+                    <h2>리뷰 관리</h2>
                     <button class="btn-primary" onclick="loadReviews()">새로고침</button>
                 </div>
                 <table class="data-table">
@@ -101,9 +100,9 @@
                         <tr>
                             <th>카페</th>
                             <th>작성자</th>
-                            <th>한줄평</th>
+                            <th>리뷰</th>
                             <th>감정</th>
-                            <th>클린봇</th>
+                            <th>필터</th>
                             <th>작성일</th>
                         </tr>
                     </thead>
@@ -115,7 +114,7 @@
         <div id="ownerSection" style="display: none;">
             <section class="management-section">
                 <div class="section-header">
-                    <h2>카페 사장님 가입 신청</h2>
+                    <h2>카페 사업자 가입 요청</h2>
                     <div class="filter-actions">
                         <button class="btn-secondary" onclick="loadOwnerVerifications('')">전체</button>
                         <button class="btn-secondary" onclick="loadOwnerVerifications('PENDING')">대기</button>
@@ -126,8 +125,8 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>신청자</th>
-                            <th>신청 카페</th>
+                            <th>요청자</th>
+                            <th>요청 카페</th>
                             <th>사업자번호</th>
                             <th>증빙서류</th>
                             <th>상태</th>
@@ -140,6 +139,6 @@
         </div>
     </main>
 
-    <script src="../js/admin.js?v=20260524-owner-new-cafe"></script>
+    <script src="../js/admin.js?v=20260603-admin"></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
-const BACKEND_URL = `${location.protocol}//${location.hostname}:8080`;
-const API_BASE_URL = location.port === '5500' ? BACKEND_URL : '';
+const BACKEND_URL = `${location.protocol}//${location.hostname || 'localhost'}:8080`;
+const API_BASE_URL = location.port === '5500' || location.protocol === 'file:' ? BACKEND_URL : '';
 
 function routeUrl(path) {
-    return location.port === '5500' ? `${BACKEND_URL}${path}` : path;
+    return location.port === '5500' || location.protocol === 'file:' ? `${BACKEND_URL}${path}` : path;
 }
 
 async function readErrorMessage(response) {

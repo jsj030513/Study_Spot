@@ -21,9 +21,32 @@ public class DatabaseSchemaInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         ensureOwnerVerificationSupportsNewCafeRequests();
+        ensureUserMasterTable();
         normalizePlaceTypes();
         seedCafePlacesFromCafeInfo();
         seedDefaultNonCafePlaces();
+    }
+
+    private void ensureUserMasterTable() {
+        if (tableExists("user_master")) {
+            return;
+        }
+
+        try {
+            jdbcTemplate.execute("""
+                    CREATE TABLE user_master (
+                        USER_ID varchar(20) NOT NULL,
+                        USER_PW varchar(100) NOT NULL,
+                        USER_NM varchar(30) NOT NULL,
+                        ROLE_TY char(1) DEFAULT 'U',
+                        REG_DT date DEFAULT (curdate()),
+                        PRIMARY KEY (USER_ID),
+                        CONSTRAINT chk_user_role CHECK (ROLE_TY IN ('U', 'O', 'A'))
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+                    """);
+        } catch (Exception exception) {
+            log.warn("user_master table creation was skipped: {}", exception.getMessage());
+        }
     }
 
     private void ensureOwnerVerificationSupportsNewCafeRequests() {

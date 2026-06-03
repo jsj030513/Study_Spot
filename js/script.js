@@ -134,6 +134,14 @@ async function checkUserIdAvailability() {
         alert('아이디를 입력해주세요.');
         return;
     }
+    if (!/^[A-Za-z0-9_]{4,20}$/.test(userId)) {
+        alert('아이디는 영문, 숫자, 밑줄로 4~20자여야 합니다.');
+        return;
+    }
+    if (!userId) {
+        alert('아이디를 입력해주세요.');
+        return;
+    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/auth/user-ids/${encodeURIComponent(userId)}/availability`);
@@ -143,6 +151,8 @@ async function checkUserIdAvailability() {
         }
 
         const data = await response.json();
+        alert(data.available ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.');
+        return;
         alert(data.available ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.');
     } catch (error) {
         alert('서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.');

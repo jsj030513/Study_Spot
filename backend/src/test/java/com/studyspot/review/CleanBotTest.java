@@ -17,6 +17,14 @@ class CleanBotTest {
     }
 
     @Test
+    void masksSpacedBlockedWords() {
+        CleanBotResult result = cleanBot.clean("ㅅ ㅂ 여기 별로임");
+
+        assertThat(result.clean()).isFalse();
+        assertThat(result.cleanedText()).contains("***");
+    }
+
+    @Test
     void keepsCleanText() {
         CleanBotResult result = cleanBot.clean("조용하고 좋아요");
 

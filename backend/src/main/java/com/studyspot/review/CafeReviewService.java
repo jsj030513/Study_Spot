@@ -36,7 +36,9 @@ public class CafeReviewService {
     public CafeReviewResponse createCafeReview(String placeId, String userId, CafeReviewCreateRequest request) {
         assertCafe(placeId);
         CleanBotResult cleanResult = cleanBot.clean(request.content());
-        ReviewSentiment sentiment = sentimentAnalyzer.analyze(cleanResult.cleanedText());
+        ReviewSentiment sentiment = cleanResult.clean()
+                ? sentimentAnalyzer.analyze(cleanResult.cleanedText())
+                : ReviewSentiment.NEGATIVE;
         String reviewId = cafeReviewRepository.nextReviewId();
         cafeReviewRepository.insert(reviewId, placeId, userId, request.content().trim(), cleanResult, sentiment);
         return cafeReviewRepository.findByPlaceId(placeId).stream()
