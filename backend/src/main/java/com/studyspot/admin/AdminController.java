@@ -20,6 +20,7 @@ import com.studyspot.owner.OwnerVerificationResponse;
 import com.studyspot.owner.OwnerVerificationReviewRequest;
 import com.studyspot.owner.OwnerVerificationService;
 import com.studyspot.place.PlaceService;
+import com.studyspot.review.CafeReviewService;
 import com.studyspot.user.AdminUpdateUserRequest;
 import com.studyspot.user.UserResponse;
 import com.studyspot.user.UserService;
@@ -33,12 +34,14 @@ public class AdminController {
     private final UserService userService;
     private final PlaceService placeService;
     private final OwnerVerificationService ownerVerificationService;
+    private final CafeReviewService cafeReviewService;
 
     public AdminController(UserService userService, PlaceService placeService,
-            OwnerVerificationService ownerVerificationService) {
+            OwnerVerificationService ownerVerificationService, CafeReviewService cafeReviewService) {
         this.userService = userService;
         this.placeService = placeService;
         this.ownerVerificationService = ownerVerificationService;
+        this.cafeReviewService = cafeReviewService;
     }
 
     @GetMapping("/summary")
@@ -65,6 +68,13 @@ public class AdminController {
     public void deleteUser(@LoginUser AuthUser authUser, @PathVariable String userId) {
         assertAdmin(authUser);
         userService.deleteByAdmin(userId);
+    }
+
+    @DeleteMapping("/reviews/{reviewId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteReview(@LoginUser AuthUser authUser, @PathVariable String reviewId) {
+        assertAdmin(authUser);
+        cafeReviewService.deleteReview(reviewId);
     }
 
     @GetMapping("/owner-verifications")

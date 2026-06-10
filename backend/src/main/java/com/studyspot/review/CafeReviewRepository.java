@@ -64,4 +64,8 @@ public class CafeReviewRepository {
                 cleanResult.clean() ? "Y" : "N"
         );
     }
+
+    public int deleteById(String reviewId) {
+        return jdbcTemplate.update("DELETE FROM cafe_review WHERE REVIEW_ID = ?", reviewId);
+    }
 }

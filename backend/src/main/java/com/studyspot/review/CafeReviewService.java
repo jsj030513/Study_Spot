@@ -48,6 +48,14 @@ public class CafeReviewService {
                 .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "한줄평 저장 결과를 확인할 수 없습니다."));
     }
 
+    @Transactional
+    public void deleteReview(String reviewId) {
+        int deletedRows = cafeReviewRepository.deleteById(reviewId);
+        if (deletedRows == 0) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+        }
+    }
+
     private void assertCafe(String placeId) {
         if (!placeService.isCafe(placeId)) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "카페에만 한줄평을 등록할 수 있습니다.");

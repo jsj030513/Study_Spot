@@ -151,15 +151,21 @@ body {
 .approve-btn,
 .reject-btn,
 .text-danger-btn {
-    border: none;
-    background: none;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    background: #fff;
     font-weight: 700;
     cursor: pointer;
+    padding: 0.35rem 0.65rem;
 }
 
 .approve-btn { color: var(--success); }
 .reject-btn,
 .text-danger-btn { color: var(--danger); }
+
+.text-danger-btn:hover {
+    background: #ffe3e3;
+}
 
 .download-link {
     display: inline-block;

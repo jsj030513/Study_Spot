@@ -11,7 +11,7 @@ public class ReviewSentimentAnalyzer {
             "좋", "추천", "친절", "조용", "깔끔", "쾌적", "편해", "빠르", "만족", "최고", "괜찮"
     );
     private static final List<String> NEGATIVE_WORDS = List.of(
-            "별로", "불친절", "시끄", "더럽", "느림", "불편", "최악", "비싸", "화남", "짜증", "나쁨", "싫"
+            "별로", "불친절", "시끄", "더럽","더러워", "느림", "불편", "최악", "비싸", "화남", "짜증", "나쁨", "싫"
     );
 
     public ReviewSentiment analyze(String text) {

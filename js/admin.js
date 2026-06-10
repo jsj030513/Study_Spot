@@ -217,7 +217,7 @@ async function deleteUser(userId) {
 
 async function loadReviews() {
     const tbody = document.getElementById('reviewTableBody');
-    tbody.innerHTML = emptyRow(6, '리뷰를 불러오는 중입니다.');
+    tbody.innerHTML = emptyRow(7, '리뷰를 불러오는 중입니다.');
 
     try {
         if (!places.length) await loadPlaces();
@@ -228,7 +228,7 @@ async function loadReviews() {
         }));
         renderReviewTable(reviewGroups.flat());
     } catch (error) {
-        renderEmpty('reviewTableBody', error.message, 6);
+        renderEmpty('reviewTableBody', error.message, 7);
     }
 }
 
@@ -241,10 +241,22 @@ function renderReviewTable(reviews) {
             <td>${sentimentBadge(review.sentiment)}</td>
             <td>${review.clean ? '<span class="status-badge status-clean">통과</span>' : '<span class="status-badge status-blocked">차단</span>'}</td>
             <td>${escapeHtml(review.registeredDate || '-')}</td>
+            <td><button class="text-danger-btn" onclick="deleteReview('${escapeJs(review.reviewId)}')">삭제</button></td>
         </tr>
     `).join('');
 
-    document.getElementById('reviewTableBody').innerHTML = rows || emptyRow(6, '등록된 리뷰가 없습니다.');
+    document.getElementById('reviewTableBody').innerHTML = rows || emptyRow(7, '등록된 리뷰가 없습니다.');
+}
+
+async function deleteReview(reviewId) {
+    if (!confirm('이 리뷰를 삭제하시겠습니까?')) return;
+
+    try {
+        await requestJson(`/api/admin/reviews/${encodeURIComponent(reviewId)}`, { method: 'DELETE' });
+        await loadReviews();
+    } catch (error) {
+        alert(error.message);
+    }
 }
 
 function sentimentBadge(sentiment) {
